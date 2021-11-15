@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>edu.nju.practice</groupId>
+	<artifactId>StreamingPractice</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	
+	<parent>
+	  	<groupId>org.springframework.boot</groupId>
+	  	<artifactId>spring-boot-starter-parent</artifactId>
+	  	<version>1.5.6.RELEASE</version>
+	</parent>
+  
+	<dependencies>
+	
+		<!-- web -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		
+		<!-- spark-core -->
+		<dependency>
+		    <groupId>org.apache.spark</groupId>
+		    <artifactId>spark-core_2.12</artifactId>
+		    <version>3.2.0</version>
+		</dependency>
+	
+		<!-- spark-sql -->
+		<dependency>
+		    <groupId>org.apache.spark</groupId>
+		    <artifactId>spark-sql_2.12</artifactId>
+		    <version>3.2.0</version>
+		</dependency>
+		
+		<!-- spark-streaming -->
+		<dependency>
+		    <groupId>org.apache.spark</groupId>
+		    <artifactId>spark-streaming_2.12</artifactId>
+		    <version>3.2.0</version>
+		    <scope>provided</scope>
+		</dependency>
+		
+		<!-- devtools -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>springloaded</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+		
+	</dependencies>
+	
+	<!-- maven -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>
