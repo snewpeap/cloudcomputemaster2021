@@ -40,6 +40,13 @@ public class Movie implements Serializable
 		this.boxOffice = boxOffice;
 		this.audience = audience;
 	}
+	
+	public Movie(Movie movie)
+	{
+		this(movie.movieID, movie.entityID, movie.movieName, movie.genre, movie.country, movie.date,
+			movie.cinemaID, movie.cinemaName, movie.province, movie.city, movie.boxOffice, 
+			movie.audience);
+	}
 
 	public int getMovieID() {
 		return movieID;
