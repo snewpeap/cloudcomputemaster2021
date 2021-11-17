@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.nju.practice.util.HdfsUtil;
+import edu.nju.practice.util.HdfsComponent;
 import edu.nju.practice.util.QueueUtil;
 import edu.nju.practice.util.SocketUtil;
 import edu.nju.practice.util.SparkUtil;
@@ -27,7 +27,7 @@ public class StreamingController
 	private QueueUtil queueUtil;
 	
 	@Autowired
-	private HdfsUtil hdfsUtil;
+	private HdfsComponent hdfsComponent;
 	
 	@RequestMapping("/startSocket")
 	public int startSocket()
@@ -50,7 +50,7 @@ public class StreamingController
 		/*sparkUtil.startMonitorHdfs();
 		hdfsUtil.modifyFile();*/
 		
-		hdfsUtil.modifyFile();
+		hdfsComponent.modifyFile();
 		sparkUtil.startMonitorHdfs();
 		
 		return 1;
