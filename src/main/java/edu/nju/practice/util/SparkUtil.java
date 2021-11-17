@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,8 +55,22 @@ public class SparkUtil
 			lines.print();
 			
 			lines.foreachRDD(javaRDD->{
-				// 将一行json字符串映射为一个movie对象，并收集成列表
-				List<Movie> movies=javaRDD.map(line->new Gson().fromJson(line, Movie.class)).collect();
+				List<Movie> movies=
+					// 将一行json字符串映射为一个movie对象
+					javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+					// 按电影名和movie对象映射为pair
+					.mapToPair(movie->new Tuple2<>(movie.getMovieName(), movie))
+					// 按电影名对两个movie对象求票房的和
+					.reduceByKey((movie1, movie2)->{
+						Movie movie=new Movie();
+						movie.setDate(movie1.getDate());
+						movie.setMovieName(movie1.getMovieName());
+						movie.setBoxOffice(movie1.getBoxOffice()+movie2.getBoxOffice());
+						return movie;
+					})
+					// 取tuple的第二个参数，映射为movie对象
+					.map(tuple->tuple._2())
+					.collect();
 				queueUtil.push(movies);
 				
 				// 超时
