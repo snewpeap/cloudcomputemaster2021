@@ -54,9 +54,8 @@ public class SparkUtil
 				.socketTextStream(hostname, port);
 			lines.print();
 			lines.foreachRDD(javaRDD->{
+				// 将一行json字符串映射为一个movie对象，并收集成列表
 				List<Movie> movies=javaRDD.map(line->new Gson().fromJson(line, Movie.class)).collect();
-				System.out.println("xxx: "+movies);
-				System.out.println(javaRDD.collect());
 				queueUtil.push(movies);
 				
 				// 超时
@@ -89,8 +88,6 @@ public class SparkUtil
 				List<Movie> cityMovies=this.computeByCity(javaRDD);
 				
 				queueUtil.pushList(new MovieList(genreMovies, countryMovies, cityMovies));
-					
-				System.out.println(cityMovies);
 
 				// 超时
 				if(genreMovies.size()==0)
@@ -104,7 +101,11 @@ public class SparkUtil
 	
 	private List<Movie> computeByGenre(JavaRDD<String> javaRDD)
 	{
-		List<Movie> movies=javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+			
+		List<Movie> movies=
+			// 将一行json字符串映射为一个movie对象
+			javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+			// 按电影类型列表扩充movie的RDD
 			.flatMap(movie->{
 				List<Movie> movieList=movie.getGenre().stream()
 					.map(genre->{
@@ -113,14 +114,19 @@ public class SparkUtil
 						return newMovie;
 					}).collect(Collectors.toList());
 				return movieList.iterator();
-			}).mapToPair(movie->new Tuple2<>(movie.getGenre().get(0), movie))
+			})
+			// 按电影类型和movie对象映射为pair
+			.mapToPair(movie->new Tuple2<>(movie.getGenre().get(0),movie))
+			// 按电影类型对两个movie对象求观众数的和
 			.reduceByKey((movie1, movie2)->{
 				Movie movie=new Movie();
 				movie.setDate(movie1.getDate());
 				movie.setGenre(Arrays.asList(movie1.getGenre().get(0)));
 				movie.setAudience(movie1.getAudience()+movie2.getAudience());
 				return movie;
-			}).map(tuple->tuple._2())
+			})
+			// 取tuple的第二个参数，映射为movie对象
+			.map(tuple->tuple._2())
 			.collect();
 		
 		return movies;
@@ -128,7 +134,10 @@ public class SparkUtil
 	
 	private List<Movie> computeByCountry(JavaRDD<String> javaRDD)
 	{
-		List<Movie> movies=javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+		List<Movie> movies=
+			// 将一行json字符串映射为一个movie对象
+			javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+			// 按出品国家列表扩充movie的RDD
 			.flatMap(movie->{
 				List<Movie> movieList=movie.getCountry().stream()
 					.map(country->{
@@ -137,14 +146,19 @@ public class SparkUtil
 						return newMovie;
 					}).collect(Collectors.toList());
 				return movieList.iterator();
-			}).mapToPair(movie->new Tuple2<>(movie.getCountry().get(0), movie))
+			})
+			// 按出品国家和movie对象映射为pair
+			.mapToPair(movie->new Tuple2<>(movie.getCountry().get(0), movie))
+			// 按出品国家对两个movie对象求观众数的和
 			.reduceByKey((movie1, movie2)->{
 				Movie movie=new Movie();
 				movie.setDate(movie1.getDate());
 				movie.setCountry(Arrays.asList(movie1.getCountry().get(0)));
 				movie.setAudience(movie1.getAudience()+movie2.getAudience());
 				return movie;
-			}).map(tuple->tuple._2())
+			})
+			// 取tuple的第二个参数，映射为movie对象
+			.map(tuple->tuple._2())
 			.collect();
 		
 		return movies;
@@ -152,15 +166,21 @@ public class SparkUtil
 	
 	private List<Movie> computeByCity(JavaRDD<String> javaRDD)
 	{
-		List<Movie> movies=javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+		List<Movie> movies=
+			// 将一行json字符串映射为一个movie对象
+			javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+			// 按城市和movie对象映射为pair
 			.mapToPair(movie->new Tuple2<>(movie.getCity(), movie))
+			// 按城市对两个movie对象求观众数的和
 			.reduceByKey((movie1, movie2)->{
 				Movie movie=new Movie();
 				movie.setDate(movie1.getDate());
 				movie.setCity(movie1.getCity());
 				movie.setAudience(movie1.getAudience()+movie2.getAudience());
 				return movie;
-			}).map(tuple->tuple._2())
+			})
+			// 取tuple的第二个参数，映射为movie对象
+			.map(tuple->tuple._2())
 			.collect();
 		
 		return movies;
