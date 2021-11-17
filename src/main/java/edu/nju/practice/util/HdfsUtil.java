@@ -1,20 +1,18 @@
 package edu.nju.practice.util;
 
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 public class HdfsUtil {
     /**
      * Timer任务时间间隔，1s
      */
     private final long MODIFY_TIME = 1000L;
+
+    private int i = 0;
 
     private FileSystem fs = null;
 
@@ -36,7 +34,9 @@ public class HdfsUtil {
      */
     public void modifyTime(String path) throws IOException{
         //获取hdfs的path文件夹下所有文件的信息
-        RemoteIterator<LocatedFileStatus> listFiles = fs.listFiles(new Path(path),true);
+        FileStatus[] listStatus = fs.listStatus(new Path(path));
+        //按文件名字典排序
+        Arrays.sort(listStatus, (o1, o2) -> o1.getPath().getName().toString().compareTo(o2.getPath().getName().toString()));
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -44,13 +44,13 @@ public class HdfsUtil {
             @Override
             public void run() {
                 try {
-                    if(listFiles.hasNext() == true) {
-                        LocatedFileStatus status = listFiles.next();
-                        Path filepath = status.getPath();
+                    if(i < listStatus.length) {
+                        Path filepath = listStatus[i].getPath();
                         if (filepath.toString().endsWith(".jl") == true) {
                             long currentTime = System.currentTimeMillis();
                             fs.setTimes(filepath, currentTime, -1);
                         }
+                        i++;
                     }
                     else {
                         timer.cancel();
@@ -59,7 +59,7 @@ public class HdfsUtil {
                     e.printStackTrace();
                 }
             }
-        }, MODIFY_TIME, MODIFY_TIME);
+        }, MODIFY_TIME, MODIFY_TIME); //MODIFY_TIME时间后开始，循环间隔MODIFY_TIME
     }
 
 
