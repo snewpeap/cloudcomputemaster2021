@@ -63,24 +63,24 @@ public class HdfsUtil {
     }
 
 
-    //测试用的
-    /**
-     * 从本地拷贝文件到hdfs
-     * @param src
-     * @param dst
-     * @throws IOException
-     */
-    public void copyFromLocal(String src, String dst) throws IOException{
-        fs.copyFromLocalFile(new Path(src), new Path(dst));
-    }
-
-    //test
-    public static void main(String[] args) throws Exception {
-        HdfsUtil hdfsUtil = new HdfsUtil();
-//        hdfsUtil.copyFromLocal("/Users/robot17/Documents/test 2.jl","/aa/bb/dd");
-//        hdfsUtil.copyFromLocal("/Users/robot17/Documents/test 3.jl","/aa/bb/dd");
-//        hdfsUtil.copyFromLocal("/Users/robot17/Documents/test 4.jl","/aa/bb/dd");
-        hdfsUtil.modifyTime("/aa/bb/dd");
-    }
+//    //测试用的
+//    /**
+//     * 从本地拷贝文件到hdfs
+//     * @param src
+//     * @param dst
+//     * @throws IOException
+//     */
+//    public void copyFromLocal(String src, String dst) throws IOException{
+//        fs.copyFromLocalFile(new Path(src), new Path(dst));
+//    }
+//
+//    //test
+//    public static void main(String[] args) throws Exception {
+//        HdfsUtil hdfsUtil = new HdfsUtil();
+////        hdfsUtil.copyFromLocal("/Users/robot17/Documents/test 2.jl","/aa/bb/dd");
+////        hdfsUtil.copyFromLocal("/Users/robot17/Documents/test 3.jl","/aa/bb/dd");
+////        hdfsUtil.copyFromLocal("/Users/robot17/Documents/test 4.jl","/aa/bb/dd");
+//        hdfsUtil.modifyTime("/aa/bb/dd");
+//    }
 
 }
