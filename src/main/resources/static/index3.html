@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>动态排序柱状图1</title>
+		<style>
+			* {
+				margin: 0px;
+				padding: 0px;
+			}
+			html, body, #app {
+				height: 100%;
+				width: 100%;
+			}
+			#app {
+				text-align: center;
+			}
+			.box {
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				margin: auto;
+				width: 60%;
+				height: 80%;
+			}
+			.box input[type="button"] {
+				width: 100px;
+				height: 30px;
+				border: 0px;
+				color: white;
+				background-color: dodgerblue;
+				cursor: pointer;
+			}
+			.box input[type="button"]:hover {
+				background-color: lawngreen;
+			}
+			.layout{
+				border: 1px solid #38393a;
+				background: #f5f7f9;
+				position: relative;
+				height: 100%;
+				border-radius: 4px;
+				overflow: hidden;
+			}
+			.layout-logo{
+				width: 100px;
+				height: 30px;
+				background: #5b6270;
+				border-radius: 3px;
+				float: left;
+				position: relative;
+				top: 15px;
+				left: 20px;
+			}
+			.layout-nav{
+				width: 420px;
+				margin: 0 auto;
+				margin-right: 20px;
+			}
+			.layout-footer-center{
+				text-align: center;
+			}
+		</style>
+		<!-- Vue -->
+		<script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+		<script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+		<!-- Echarts -->
+    	<script src="https://cdn.staticfile.org/echarts/5.2.2/echarts.min.js"></script>
+		
+		<link rel="stylesheet" href="//unpkg.com/view-design/dist/styles/iview.css">
+		<!-- import iView -->
+		<script src="//unpkg.com/view-design/dist/iview.min.js"></script>
+
+	</head>
+	<body>
+		<div id="app" class="layout">
+			<Layout>
+				<Header style="min-height: 50px;background-color: #5b6270;">
+				
+				</Header>
+				<Content :style="{padding: '0 150px'}">
+					<Breadcrumb :style="{margin: '20px 0'}">
+						<a href="/index.html">Aim1</a>
+       	 				<a href="/index2.html">Aim2</a>
+						<a href="/index3.html">Aim3</a>
+					</Breadcrumb>
+					<Card>
+						<div style="min-height: 400px;">
+							<div id="app">
+								<div class="box">
+									<input type="button" value="启动Socket" v-on:click="startSocket()" />
+									<div id="main" style="width: 100%; height:90%;"></div>
+								</div>
+							</div>
+						</div>
+					</Card>
+				</Content>
+				<Footer class="layout-footer-center"></Footer>
+			</Layout>
+		</div>
+		<script>
+			var app=new Vue({
+				el: '#app',
+				data: {
+					data: [],
+					new_datas:[],
+					newData: [],
+					nameMap: {},
+					nameKey: [],
+					nameValue: [],
+					day: 1,
+					colors: ["red", "orange", "yellow", "green", "blue"],
+					colorMap: {},
+					colorIndex: 0,
+					urls: [
+						'startSocket',
+						'getStreamingData'
+					]
+				},
+				methods: {
+					startSocket: function() {
+						var jsonData={};
+		                //发送 post请求
+		                this.$http.post(this.urls[0], jsonData, {
+		                	emulateJSON: true
+		                }).then(function(res){
+		                   	console.log(res.body);
+		                   	if(res.body==1) {
+		                   		app.initChart();
+		                   	} else {
+		                   		alert("启动Socket失败！");
+		                   	}
+		                },function(res){
+		                    console.log(res);
+		                });
+					},
+					getStreamingData: function() {
+						var jsonData={};
+		                //发送 post请求
+		                this.$http.post(this.urls[1], jsonData, {
+		                	emulateJSON: true
+		                }).then(function(res){
+	
+		                   	app.newData=res.body;
+		                   	if(app.newData.length>0) {
+		                   		app.updateData();
+		                   	}
+		                },function(res){
+		                    console.log(res);
+		                });
+					},
+					initChart: function() {
+						var myChart = echarts.init(document.getElementById('main'));
+						var option=this.getOption();
+						
+						setTimeout(function () {
+						  	app.getStreamingData();
+						}, 0);
+						var cnt=0;
+						var timer=setInterval(function () {
+						  	app.getStreamingData();
+						  	if(app.newData.length==0) {
+						  		cnt++;
+						  		if(cnt>30) {
+						  			clearInterval(timer);
+						  		}
+						  	}
+						}, 1000);
+						
+						myChart.setOption(option);
+					},
+					getOption: function() {
+						var option = {
+							series: [
+								{
+								type: 'pie',
+								radius: [0, '50%'],
+								data: this.new_datas
+								}
+							],
+							graphic: {
+						      	elements: [
+						        	{
+										type: 'text',
+						          		top: 0,
+						          		right: 70,
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		},
+										z: 100
+						        	}
+						      	]
+						    }
+						};
+						return option;
+					},
+					getColor: function(name) {
+						if(!this.colorMap[name]) {
+		          			this.colorMap[name]=this.colors[this.colorIndex];
+		          			this.colorIndex=(this.colorIndex+1)%this.colors.length;
+		          		}
+		            	return this.colorMap[name];
+					},
+					updateData: function() {
+						for(var i=0; i<this.newData.length; i++) {
+							if(this.nameMap[this.newData[i].movieName]) {
+								for(var k=0; k<this.data.length; k++) {
+									if(this.data[k].movieName==this.newData[i].movieName) {
+										this.data[k].date=this.newData[i].date;
+										this.data[k].boxOffice+=this.newData[i].boxOffice;
+										this.nameValue[k]=this.data[k].boxOffice.toFixed(2);
+										break;
+									}
+								}
+							} else {
+								this.nameMap[this.newData[i].movieName]=true;
+								this.nameKey.push(this.newData[i].movieName);
+								// 深复制
+								this.data.push(JSON.parse(JSON.stringify(this.newData[i])));
+								this.nameValue.push(this.newData[i].boxOffice.toFixed(2));
+							}
+						}
+						//data=[{value,name}]
+						this.new_datas = [];
+						for(var i=0;i<this.nameValue.length;i++){
+							var dp = {name:this.nameKey[i],value:this.nameValue[i]};
+							this.new_datas.push(JSON.parse(JSON.stringify(dp)));
+						}
+						var myChart = echarts.init(document.getElementById('main'));
+						console.log(this.new_datas);
+						myChart.setOption({
+							series: [
+							    {
+							       type: 'pie',
+							       data: this.new_datas,
+								   radius: [0, '50%'],
+							    }
+						   	],
+						   	graphic: {
+						      	elements: [
+						        	{
+						          		style: {
+								            text: this.newData[0].date,
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		}
+						        	}
+						      	]
+						    }
+						});
+				
+					},
+				},
+				mounted() {
+				
+					
+				}
+			});
+		</script>
+	</body>
+</html>
