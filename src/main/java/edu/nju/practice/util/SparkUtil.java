@@ -1,5 +1,6 @@
 package edu.nju.practice.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,9 +51,10 @@ public class SparkUtil
 		new Thread(()->{
 			this.javaStreamingContext=sparkConfig.getStreamingContext();
 			
-			JavaReceiverInputDStream<String> lines=javaStreamingContext
-				.socketTextStream(hostname, port);
+			JavaDStream<String> lines=javaStreamingContext.textFileStream(directory);
+			//JavaDStream<String> lines=javaStreamingContext.socketTextStream(hostname, port);
 			lines.print();
+			
 			lines.foreachRDD(javaRDD->{
 				// 将一行json字符串映射为一个movie对象，并收集成列表
 				List<Movie> movies=javaRDD.map(line->new Gson().fromJson(line, Movie.class)).collect();
@@ -75,8 +77,8 @@ public class SparkUtil
 		new Thread(()->{
 			this.javaStreamingContext=sparkConfig.getStreamingContext();
 			
-			//JavaDStream<String> lines=javaStreamingContext.textFileStream(directory);
-			JavaDStream<String> lines=javaStreamingContext.socketTextStream(hostname, port);
+			JavaDStream<String> lines=javaStreamingContext.textFileStream(directory);
+			//JavaDStream<String> lines=javaStreamingContext.socketTextStream(hostname, port);
 			lines.print();
 			
 			lines.foreachRDD(javaRDD->{
@@ -87,10 +89,11 @@ public class SparkUtil
 				// 观影地区
 				List<Movie> cityMovies=this.computeByCity(javaRDD);
 				
-				queueUtil.pushList(new MovieList(genreMovies, countryMovies, cityMovies));
-
-				// 超时
-				if(genreMovies.size()==0)
+				System.out.println("xxx:"+genreMovies.size());
+				
+				if(genreMovies.size()>0)
+					queueUtil.pushList(new MovieList(genreMovies, countryMovies, cityMovies));
+				else // 超时
 					this.checkTimeout();
 			});
 			
@@ -166,9 +169,14 @@ public class SparkUtil
 	
 	private List<Movie> computeByCity(JavaRDD<String> javaRDD)
 	{
+		// 疫情相关的城市
+		List<String> citys=new ArrayList<String>(Arrays.asList("南京市", "郑州市", "张家界市", "上海市", "广州市"));
+		
 		List<Movie> movies=
 			// 将一行json字符串映射为一个movie对象
 			javaRDD.map(line->new Gson().fromJson(line, Movie.class))
+			// 按疫情相关的城市过滤
+			.filter(movie->citys.contains(movie.getCity()))
 			// 按城市和movie对象映射为pair
 			.mapToPair(movie->new Tuple2<>(movie.getCity(), movie))
 			// 按城市对两个movie对象求观众数的和
@@ -190,15 +198,20 @@ public class SparkUtil
 	{
 		// 数据为空超过timeoutSecond，则停止Streaming上下文
 		count++;
+		System.out.println(count+", "+timeoutSecond);
 		if(count>timeoutSecond)
+		{
+			System.out.println(count+", "+timeoutSecond);
 			javaStreamingContext.stop(false);
+		}
 	}
 	
 	private void startStreamingContext()
 	{
 		javaStreamingContext.start();
 		try {
-			javaStreamingContext.awaitTermination();
+			//javaStreamingContext.awaitTermination();
+			javaStreamingContext.awaitTerminationOrTimeout(timeoutSecond*1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
