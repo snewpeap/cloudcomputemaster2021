@@ -47,6 +47,7 @@ public class SocketUtil
 				Map<String, List<Movie>> movieMap=Arrays.stream(lines)
 					.map(line->new Gson().fromJson(line, Movie.class))
 					.collect(Collectors.groupingBy(Movie::getDate));
+					//这里可以放到spark内部进行groupByKey
 				List<String> dates=movieMap.keySet().stream().sorted().collect(Collectors.toList());
 				
 				// 启动Socket

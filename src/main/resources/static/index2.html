@@ -105,24 +105,112 @@
 			var app=new Vue({
 				el: '#app',
 				data: {
-					_rawData: [],//dataset
-					elements: [
-							'恐怖',
-							'悬疑',
-					],	//所有元素、地区等内容
-					datasetWithFilters: [],//filter
-					seriesList: [],//series
-					newData: [],
-					nameMap: {},
-					nameKey: [],
-					nameValue: [],
+					//张家界，南京
+					shanghai:[],
+					guangzhou:[],
+					nanjing:[],
+					zhengzhou:[],
+					zhangjiajie:[],
+					_rawData2: [],//dataset
+					elements2: ["南京市","郑州市","张家界市","上海市","广州市"],	//所有元素、地区等内容
+					data2:[],
+					datasetWithFilters2: [],//filter
+					seriesList2: [],//series
+					newData2: [],
+					dates2:[],//x轴
+					nameMap2: {},
+					nameKey2: [],
+					nameValue2: [],
+					option2: {
+							legend:{
+								data:this.elements2,
+							},
+							tooltip: {
+								order: 'valueDesc',
+								trigger: 'axis'
+							},
+							xAxis: {
+								type: 'category',
+								nameTextStyle: {
+                    				fontWeight: 600,
+									fontSize: 18
+								},
+								type: 'category',
+								boundaryGap: false,
+								data: this.dates2,
+								
+							},
+							yAxis: {
+								type: 'value',
+								name: 'BoxOffice',
+								axisLabel: {
+									interval: 'auto',
+									formatter: '{value} %'
+								}
+							},
+							grid: {
+								right: 140
+							},
+							series:[
+								//"南京市","郑州市","张家界市","上海市","广州市"
+								{
+									name:'南京市',
+									type:'line',
+									smooth: true,
+									data: this.nanjing,	// 绑定实时数据数组
+								},
+								{
+									name:'郑州市',
+									type:'line',
+									smooth: true,
+									data: this.zhengzhou,	// 绑定实时数据数组
+								},
+								{
+									name:'张家界市',
+									type:'line',
+									smooth: true,
+									data: this.zhangjiajie,	// 绑定实时数据数组
+								},
+								{
+									name:'上海市',
+									type:'line',
+									smooth: true,
+									data: this.shanghai,	// 绑定实时数据数组
+								},
+								{
+									name:'广州市',
+									type:'line',
+									smooth: true,
+									data: this.guangzhou,	// 绑定实时数据数组
+								}
+							],
+							animationDuration: 0,
+						 	animationDurationUpdate: 3000,
+						  	animationEasing: 'linear',
+						  	animationEasingUpdate: 'linear',
+						  	graphic: {
+						      	elements: [
+						        	{
+						          		type: 'text',
+						          		top: 0,
+						          		right: 70,
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		},
+						          		z: 100
+						        	}
+						      	]
+						    }
+					},
 					day: 1,
 					colors: ["red", "orange", "yellow", "green", "blue"],
 					colorMap: {},
 					colorIndex: 0,
 					urls: [
-						'startSocket',
-						'getStreamingData'
+						'api/startSocket',
+						'api/getStreamingData'
 					]
 				},
 				methods: {
@@ -132,7 +220,7 @@
 		                this.$http.post(this.urls[0], jsonData, {
 		                	emulateJSON: true
 		                }).then(function(res){
-		                   	console.log(res.body);
+		                   	//console.log(res.body);
 		                   	if(res.body==1) {
 		                   		app.initChart();
 		                   	} else {
@@ -142,124 +230,46 @@
 		                    console.log(res);
 		                });
 					},
-					getStreamingData: function() {
+					getStreamingData2: function() {
 						var jsonData={};
 		                //发送 post请求
 		                this.$http.post(this.urls[1], jsonData, {
 		                	emulateJSON: true
 		                }).then(function(res){
-		                   	console.log(res.body);
-		                   	app.newData=res.body;
-		                   	if(app.newData.length>0) {
-		                   		app.updateData();
+		                   	//console.log(res.body);
+		                   	app.newData2=res.body.cityMovies;
+		                   	if(app.newData2.length>0) {
+		                   		app.updateData2();
 		                   	}
 		                },function(res){
 		                    console.log(res);
 		                });
 					},
-					initChart: function() {
+					initChart2: function() {
 						var myChart = echarts.init(document.getElementById('main'));
 						var option=this.getOption();
+						
+						setTimeout(function () {
+						  	app.getStreamingData();
+						}, 0);
 						var cnt=0;
-						myChart.setOption(option);
-					},
-					getOption: function() {
-						var Tself = this;
-						this._rawData = [
-						{"Income":800, "pop":39, "pcd":645526, "Element":'恐怖', "Date":1800},
-						{"Income":300, "pop":39, "pcd":645526, "Element":'悬疑', "Date":1800},
-						{"Income":880, "pop":39, "pcd":645526, "Element":'恐怖', "Date":1801},
-						{"Income":600, "pop":39, "pcd":645526, "Element":'悬疑', "Date":1801},
-						{"Income":980, "pop":39, "pcd":645526, "Element":'恐怖', "Date":1802},
-						{"Income":700, "pop":39, "pcd":645526, "Element":'悬疑', "Date":1802},
-						{"Income":1080, "pop":39, "pcd":645526, "Element":'恐怖', "Date":1803},
-						{"Income":800, "pop":39, "pcd":645526, "Element":'悬疑', "Date":1803},
+						var timer=setInterval(function () {
+						  	app.getStreamingData2();
+						  	if(app.newData2.length==0) {
+								  
+						  		cnt++;
+						  		if(cnt>30) {
+						  			clearInterval(timer);
+						  		}
+						  	}
+						}, 1000);
 
-					];
-					//改写rawData可以改变option
-						echarts.util.each(
-							Tself.elements,
-							function(element){
-								var datasetId = 'dataset_' + element;
-								Tself.datasetWithFilters.push({
-									id: datasetId,
-									fromDatasetId: 'dataset_raw',
-									transform: {
-										type: 'filter',
-										//筛选从什么时候开始
-										config: {
-											and: [
-												{ dimension: 'Date', gte: 1800 },
-												{ dimension: 'Element', value: element }
-											]
-										}
-									}
-								});
-								Tself.seriesList.push({
-									type: 'line',
-									datasetId: datasetId,
-									showSymbol: false,
-									name: element,
-									endLabel: {
-										show: true,
-										formatter: function (params) {
-									
-											return params.data['Element'] + ': ' + params.data['Income'];
-										}
-									}, 
-									labelLayout: {
-										moveOverlap: 'shiftY'
-									},
-									emphasis: {
-										focus: 'series'
-									},
-									encode: {
-										x: 'Date',
-										y: 'Income',
-										label: ['Element', 'Income'],
-										itemName: 'Date',
-										tooltip: ['Income']
-									}
-									//对dataset的处理
-								});
-							}
-						)
-						var  option = {
-							animationDuration: 10000,
-							dataset: [
-								{
-									id: 'dataset_raw',
-									source: Tself._rawData
-								},
-								...this.datasetWithFilters
-							],
-							//数据集筛选数据
-							title: {
-								text: 'Sth'
-							},
-							tooltip: {
-								order: 'valueDesc',
-								trigger: 'axis'
-							},
-							xAxis: {
-								type: 'category',
-								nameLocation: 'middle'
-							},
-				
-							yAxis: {
-								name: 'income'
-							},
-				
-							grid: {
-								right: 140
-							},
-							series: this.seriesList
-				
-						};
-						var myChart = echarts.init(document.getElementById('main'));
-						console.log(option);
-						myChart.setOption(option);
-						return option;
+						myChart.setOption(this.option);
+					},
+					getOption2: function() {
+						var Tself = this;
+						
+						return this.option2;
 					},
 					getColor: function(name) {
 						if(!this.colorMap[name]) {
@@ -268,54 +278,39 @@
 		          		}
 		            	return this.colorMap[name];
 					},
-					updateData: function() {
-						for(var i=0; i<this.newData.length; i++) {
-							if(this.nameMap[this.newData[i].movieName]) {
-								for(var k=0; k<this.data.length; k++) {
-									if(this.data[k].movieName==this.newData[i].movieName) {
-										this.data[k].date=this.newData[i].date;
-										this.data[k].boxOffice+=this.newData[i].boxOffice;
-										this.nameValue[k]=this.data[k].boxOffice.toFixed(2);
-										break;
-									}
-								}
-							} else {
-								this.nameMap[this.newData[i].movieName]=true;
-								this.nameKey.push(this.newData[i].movieName);
-								// 深复制
-								this.data.push(JSON.parse(JSON.stringify(this.newData[i])));
-								this.nameValue.push(this.newData[i].boxOffice.toFixed(2));
+					updateData2: function() {
+						//取city, audience, date
+						//算audience每天的然后依次push到对应的城市项
+						for(var i=0; i<this.newData2.length; i++) {
+							if(this.newData2[i].city == '南京市') {
+								this.nanjing.push(this.this.newData2[i].audience);
+							}else if (this.newData2[i].city == '郑州市'){
+								this.zhengzhou.push(this.this.newData2[i].audience);
+							}else if (this.newData2[i].city== '张家界市'){
+								this.zhangjiajie.push(this.this.newData2[i].audience);
+							}else if (this.newData2[i].city == '上海市'){
+								this.shanghai.push(this.this.newData2[i].audience);
+							}else if (this.newData2[i].city== '广州市'){
+								this.guangzhou.push(this.this.newData2[i].audience);
 							}
 						}
-						
+					
 						var myChart = echarts.init(document.getElementById('main'));
-						myChart.setOption({
-							yAxis: {
-								data: this.nameKey,
-								max: this.nameKey.length<10?this.nameKey.length-1:10
-							},
-							series: [
-							    {
-							       type: 'bar',
-							       data: this.nameValue,
-							    }
-						   	],
-						   	graphic: {
-						      	elements: [
-						        	{
-						          		style: {
-								            text: this.newData[0].date,
-								            font: 'bolder 50px monospace',
-								            fill: 'rgba(100, 100, 100, 0.25)'
-						          		}
-						        	}
-						      	]
-						    }
-						});
+
+						this.dates2.push(this.newData[0].date);
+						this.option2.xAxis.data = this.dates2;
+                		this.option2.series[0].data = this.nanjing;
+                		this.option2.series[1].data = this.zhengzhou;
+						this.option2.series[2].data = this.zhangjiajie;
+						this.option2.series[3].data = this.shanghai;
+						this.option2.series[4].data = this.guangzhou;
+                		this.myChart.setOption(this.option2);
+				
+					
 					},
 				},
 				mounted() {
-					this.initChart();
+				
 				}
 			});
 		</script>

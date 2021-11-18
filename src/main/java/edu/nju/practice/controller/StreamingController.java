@@ -28,6 +28,7 @@ public class StreamingController
 	
 	@Autowired
 	private HdfsComponent hdfsComponent;
+
 	
 	@RequestMapping("/startSocket")
 	public int startSocket()

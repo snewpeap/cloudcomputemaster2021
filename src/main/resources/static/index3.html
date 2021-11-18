@@ -104,19 +104,19 @@
 			var app=new Vue({
 				el: '#app',
 				data: {
-					data: [],
-					new_datas:[],
-					newData: [],
-					nameMap: {},
-					nameKey: [],
-					nameValue: [],
-					day: 1,
-					colors: ["red", "orange", "yellow", "green", "blue"],
-					colorMap: {},
-					colorIndex: 0,
+					data3: [],
+					new_datas3:[],
+					newData3: [],
+					nameMap3: {},
+					nameKey3: [],
+					nameValue3: [],
+					day3: 1,
+					colors3: ["red", "orange", "yellow", "green", "blue"],
+					colorMap3: {},
+					colorIndex3: 0,
 					urls: [
-						'startSocket',
-						'getStreamingData'
+						'api/startSocket',
+						'api/getStreamingDataList'
 					]
 				},
 				methods: {
@@ -128,7 +128,7 @@
 		                }).then(function(res){
 		                   	console.log(res.body);
 		                   	if(res.body==1) {
-		                   		app.initChart();
+		                   		app.initChart3();
 		                   	} else {
 		                   		alert("启动Socket失败！");
 		                   	}
@@ -142,26 +142,26 @@
 		                this.$http.post(this.urls[1], jsonData, {
 		                	emulateJSON: true
 		                }).then(function(res){
-	
-		                   	app.newData=res.body;
-		                   	if(app.newData.length>0) {
+							console.log(res);
+		                   	app.newData3=res.body.genreMovies;
+		                   	if(app.newData3.length>0) {
 		                   		app.updateData();
 		                   	}
+							   
 		                },function(res){
 		                    console.log(res);
 		                });
 					},
-					initChart: function() {
+					initChart3: function() {
 						var myChart = echarts.init(document.getElementById('main'));
-						var option=this.getOption();
-						
+						var option=this.getOption3();
 						setTimeout(function () {
 						  	app.getStreamingData();
 						}, 0);
 						var cnt=0;
 						var timer=setInterval(function () {
 						  	app.getStreamingData();
-						  	if(app.newData.length==0) {
+						  	if(app.newData3.length==0) {
 						  		cnt++;
 						  		if(cnt>30) {
 						  			clearInterval(timer);
@@ -171,13 +171,13 @@
 						
 						myChart.setOption(option);
 					},
-					getOption: function() {
+					getOption3: function() {
 						var option = {
 							series: [
 								{
 								type: 'pie',
 								radius: [0, '50%'],
-								data: this.new_datas
+								data: this.new_datas3
 								}
 							],
 							graphic: {
@@ -205,38 +205,39 @@
 		          		}
 		            	return this.colorMap[name];
 					},
-					updateData: function() {
-						for(var i=0; i<this.newData.length; i++) {
-							if(this.nameMap[this.newData[i].movieName]) {
-								for(var k=0; k<this.data.length; k++) {
-									if(this.data[k].movieName==this.newData[i].movieName) {
-										this.data[k].date=this.newData[i].date;
-										this.data[k].boxOffice+=this.newData[i].boxOffice;
-										this.nameValue[k]=this.data[k].boxOffice.toFixed(2);
+					updateData3: function() {
+						//取genre[0]作为categroy,audience作为数量
+						for(var i=0; i<this.newData3.length; i++) {
+							if(this.nameMap3[this.newData3[i].genre[0]]) {
+								for(var k=0; k<this.data3.length; k++) {
+									if(this.data3[k].genre[0]==this.newData3[i].genre[0]) {
+										this.data3[k].date=this.newData3[i].date;
+										this.data3[k].audience+=this.newData3[i].audience;
+										this.nameValue3[k]=this.data3[k].audience;
 										break;
 									}
 								}
 							} else {
-								this.nameMap[this.newData[i].movieName]=true;
-								this.nameKey.push(this.newData[i].movieName);
+								this.nameMap3[this.newData3[i].genre[0]]=true;
+								this.nameKey3.push(this.newData3[i].genre[0]);
 								// 深复制
-								this.data.push(JSON.parse(JSON.stringify(this.newData[i])));
-								this.nameValue.push(this.newData[i].boxOffice.toFixed(2));
+								this.data3.push(JSON.parse(JSON.stringify(this.newData3[i])));
+								this.nameValue3.push(this.newData3[i].audience);
 							}
 						}
 						//data=[{value,name}]
-						this.new_datas = [];
-						for(var i=0;i<this.nameValue.length;i++){
-							var dp = {name:this.nameKey[i],value:this.nameValue[i]};
-							this.new_datas.push(JSON.parse(JSON.stringify(dp)));
+						this.new_datas3 = [];
+						for(var i=0;i<this.nameValue3.length;i++){
+							var dp = {name:this.nameKey3[i],value:this.nameValue3[i]};
+							this.new_datas3.push(JSON.parse(JSON.stringify(dp)));
 						}
 						var myChart = echarts.init(document.getElementById('main'));
-						console.log(this.new_datas);
+						console.log(this.new_datas3);
 						myChart.setOption({
 							series: [
 							    {
 							       type: 'pie',
-							       data: this.new_datas,
+							       data: this.new_datas3,
 								   radius: [0, '50%'],
 							    }
 						   	],
@@ -244,7 +245,7 @@
 						      	elements: [
 						        	{
 						          		style: {
-								            text: this.newData[0].date,
+								            text: this.newData3[0].date,
 								            font: 'bolder 50px monospace',
 								            fill: 'rgba(100, 100, 100, 0.25)'
 						          		}
