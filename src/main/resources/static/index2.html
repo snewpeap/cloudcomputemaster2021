@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>动态排序柱状图2</title>
+		<title>动态折线图</title>
 		<style>
 			* {
 				margin: 0px;
@@ -83,15 +83,15 @@
 				</Header>
 				<Content :style="{padding: '0 150px'}">
 					<Breadcrumb :style="{margin: '20px 0'}">
-						<a href="/index.html">Aim1</a>
-       	 				<a href="/index2.html">Aim2</a>
-							<a href="/index3.html">Aim3</a>
+						<a href="/index.html">动态柱状图</a>&nbsp;&nbsp;&nbsp;&nbsp;
+       	 				<a href="/index2.html">动态折线图</a>&nbsp;&nbsp;&nbsp;&nbsp;
+							<a href="/index3.html">动态饼状图</a>
 					</Breadcrumb>
 					<Card>
 						<div style="min-height: 400px;">
 							<div id="app">
 								<div class="box">
-									<input type="button" value="启动Socket" v-on:click="startSocket()" />
+									<input type="button" value="开始监听HDFS" v-on:click="startSocket()" />
 									<div id="main" style="width: 100%; height:90%;"></div>
 								</div>
 							</div>
@@ -142,10 +142,10 @@
 							},
 							yAxis: {
 								type: 'value',
-								name: 'BoxOffice',
+								name: '观众数',
 								axisLabel: {
 									interval: 'auto',
-									formatter: '{value} %'
+									formatter: '{value}'
 								}
 							},
 							grid: {
@@ -209,8 +209,8 @@
 					colorMap: {},
 					colorIndex: 0,
 					urls: [
-						'api/startSocket',
-						'api/getStreamingData'
+						'api/startMonitor',
+						'api/getStreamingDataList'
 					]
 				},
 				methods: {
@@ -220,11 +220,11 @@
 		                this.$http.post(this.urls[0], jsonData, {
 		                	emulateJSON: true
 		                }).then(function(res){
-		                   	//console.log(res.body);
+		                   	console.log(res.body);
 		                   	if(res.body==1) {
-		                   		app.initChart();
+		                   		app.initChart2();
 		                   	} else {
-		                   		alert("启动Socket失败！");
+		                   		alert("监听HDFS失败！");
 		                   	}
 		                },function(res){
 		                    console.log(res);
@@ -236,10 +236,15 @@
 		                this.$http.post(this.urls[1], jsonData, {
 		                	emulateJSON: true
 		                }).then(function(res){
-		                   	//console.log(res.body);
-		                   	app.newData2=res.body.cityMovies;
-		                   	if(app.newData2.length>0) {
-		                   		app.updateData2();
+		                	console.log(res.body);
+		                   	if(res.body) {
+		                   		app.newData2=res.body.cityMovies;
+			                   	if(app.newData2.length>0) {
+			                   		console.log(app.newData2);
+			                   		app.updateData2();
+			                   	}
+		                   	} else {
+		                   		app.newData2=[];
 		                   	}
 		                },function(res){
 		                    console.log(res);
@@ -247,10 +252,10 @@
 					},
 					initChart2: function() {
 						var myChart = echarts.init(document.getElementById('main'));
-						var option=this.getOption();
+						var option=this.getOption2();
 						
 						setTimeout(function () {
-						  	app.getStreamingData();
+						  	app.getStreamingData2();
 						}, 0);
 						var cnt=0;
 						var timer=setInterval(function () {
@@ -258,13 +263,13 @@
 						  	if(app.newData2.length==0) {
 								  
 						  		cnt++;
-						  		if(cnt>30) {
+						  		if(cnt>50) {
 						  			clearInterval(timer);
 						  		}
 						  	}
 						}, 1000);
 
-						myChart.setOption(this.option);
+						myChart.setOption(option);
 					},
 					getOption2: function() {
 						var Tself = this;
@@ -283,28 +288,28 @@
 						//算audience每天的然后依次push到对应的城市项
 						for(var i=0; i<this.newData2.length; i++) {
 							if(this.newData2[i].city == '南京市') {
-								this.nanjing.push(this.this.newData2[i].audience);
+								this.nanjing.push(this.newData2[i].audience);
 							}else if (this.newData2[i].city == '郑州市'){
-								this.zhengzhou.push(this.this.newData2[i].audience);
+								this.zhengzhou.push(this.newData2[i].audience);
 							}else if (this.newData2[i].city== '张家界市'){
-								this.zhangjiajie.push(this.this.newData2[i].audience);
+								this.zhangjiajie.push(this.newData2[i].audience);
 							}else if (this.newData2[i].city == '上海市'){
-								this.shanghai.push(this.this.newData2[i].audience);
+								this.shanghai.push(this.newData2[i].audience);
 							}else if (this.newData2[i].city== '广州市'){
-								this.guangzhou.push(this.this.newData2[i].audience);
+								this.guangzhou.push(this.newData2[i].audience);
 							}
 						}
 					
 						var myChart = echarts.init(document.getElementById('main'));
 
-						this.dates2.push(this.newData[0].date);
+						this.dates2.push(this.newData2[0].date);
 						this.option2.xAxis.data = this.dates2;
                 		this.option2.series[0].data = this.nanjing;
                 		this.option2.series[1].data = this.zhengzhou;
 						this.option2.series[2].data = this.zhangjiajie;
 						this.option2.series[3].data = this.shanghai;
 						this.option2.series[4].data = this.guangzhou;
-                		this.myChart.setOption(this.option2);
+                		myChart.setOption(this.option2);
 				
 					
 					},
