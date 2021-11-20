@@ -2,22 +2,22 @@ package edu.nju.practice.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 public class HdfsUtil {
     /**
      * Timer任务时间间隔，1s
      */
     private final long MODIFY_TIME = 1000L;
+
+    private int i = 0;
 
     private FileSystem fs = null;
 
@@ -27,24 +27,25 @@ public class HdfsUtil {
      */
     public HdfsUtil(String dir) throws IOException{
         //读取classpath下的xxx-site.xml 配置文件，并解析其内容，封装到conf对象中
-        Configuration conf = new Configuration();
+        Configuration conf = new Configuration(false);
         //添加本地配置
         System.out.println(dir);
-        conf.addResource(new File(dir+"/core-site.xml").toURI().toURL());
-        conf.addResource(new File(dir+"/hdfs-site.xml").toURI().toURL());
-        conf.addResource(new File(dir+"/mapred-site.xml").toURI().toURL());
+        conf.addResource(new File(dir, "core-site.xml").toURI().toURL());
+        conf.addResource(new File(dir, "hdfs-site.xml").toURI().toURL());
         //根据配置信息，去获取一个具体文件系统的客户端操作实例对象
         fs = FileSystem.get(conf);
     }
 
     /**
-     * 每隔MODIFY_TIME时间，对path文件夹下一个.jl文件的modiftTime进行修改
+     * 每隔MODIFY_TIME时间，对path文件夹下一个.jl文件的modifiedTime进行修改
      * @param path 文件夹位置
      * @throws Exception
      */
     public void modifyTime(String path) throws IOException{
         //获取hdfs的path文件夹下所有文件的信息
-        RemoteIterator<LocatedFileStatus> listFiles = fs.listFiles(new Path(path),true);
+        FileStatus[] listStatus = fs.listStatus(new Path(path));
+        //按文件名字典排序
+        Arrays.sort(listStatus, (o1, o2) -> o1.getPath().getName().compareTo(o2.getPath().getName()));
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -52,13 +53,13 @@ public class HdfsUtil {
             @Override
             public void run() {
                 try {
-                    if(listFiles.hasNext() == true) {
-                        LocatedFileStatus status = listFiles.next();
-                        Path filepath = status.getPath();
+                    if(i < listStatus.length) {
+                        Path filepath = listStatus[i].getPath();
                         if (filepath.toString().endsWith(".jl") == true) {
                             long currentTime = System.currentTimeMillis();
                             fs.setTimes(filepath, currentTime, -1);
                         }
+                        i++;
                     }
                     else {
                         timer.cancel();

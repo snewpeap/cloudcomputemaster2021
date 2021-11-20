@@ -25,6 +25,9 @@ public class SparkConfig
 			.builder()
 			.appName(appName)
 			.master(master)
+			.config("spark.streaming.fileStream.minRememberDuration", "10s")
+			.config("spark.locality.wait", "2s")
+			.config("spark.jars", "hdfs://master:9000/user/spark/streaming.jar")
 			.getOrCreate();
 		
 		sparkSession.sparkContext().setLogLevel("WARN");

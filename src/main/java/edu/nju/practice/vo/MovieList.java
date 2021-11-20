@@ -1,8 +1,9 @@
 package edu.nju.practice.vo;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MovieList 
+public class MovieList implements Serializable
 {
 	private List<Movie> genreMovies;
 	private List<Movie> countryMovies;

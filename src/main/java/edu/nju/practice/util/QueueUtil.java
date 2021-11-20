@@ -1,5 +1,6 @@
 package edu.nju.practice.util;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -10,7 +11,7 @@ import edu.nju.practice.vo.Movie;
 import edu.nju.practice.vo.MovieList;
 
 @Component
-public class QueueUtil 
+public class QueueUtil implements Serializable
 {
 	private Queue<List<Movie>> movieQueue=new LinkedList<List<Movie>>();
 	private Queue<MovieList> movieListQueue=new LinkedList<MovieList>();
@@ -24,6 +25,10 @@ public class QueueUtil
 	{
 		return movieQueue.poll();
 	}
+
+	public synchronized boolean empty(){
+		return movieQueue.isEmpty();
+	}
 	
 	public synchronized boolean pushList(MovieList movieList)
 	{
@@ -33,5 +38,9 @@ public class QueueUtil
 	public synchronized MovieList popList()
 	{
 		return movieListQueue.poll();
+	}
+
+	public synchronized boolean listEmpty(){
+		return movieListQueue.isEmpty();
 	}
 }
