@@ -15,7 +15,10 @@ import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
@@ -60,51 +63,43 @@ public class SparkUtil implements Serializable
 			JavaDStream<String> lines = javaStreamingContext.textFileStream(directory);
 			//JavaDStream<String> lines=javaStreamingContext.socketTextStream(hostname, port);
 
-			lines.foreachRDD(new VoidFunction<JavaRDD<String>>() {
+			// 将一行json字符串映射为一个movie对象
+			JavaDStream<Movie> movieDStream = lines.map(new Function<String, Movie>() {
 				@Override
-				public void call(JavaRDD<String> javaRDD) throws Exception {
-					Collection<Movie> movies =
-							// 将一行json字符串映射为一个movie对象
-							javaRDD.map(new Function<String, Movie>() {
-										@Override
-										public Movie call(String line) throws Exception {
-											return new Gson().fromJson(line, Movie.class);
-										}
-									})
-									// 按电影名和movie对象映射为pair
-									.mapToPair(new PairFunction<Movie, String, Movie>() {
-										@Override
-										public Tuple2<String, Movie> call(Movie movie) throws Exception {
-											return new Tuple2<>(movie.getMovieName(), movie);
-										}
-									})
-									// 按电影名对两个movie对象求票房的和
-									.reduceByKey(new Function2<Movie, Movie, Movie>() {
-										@Override
-										public Movie call(Movie movie1, Movie movie2) throws Exception {
-											Movie movie = new Movie();
-											movie.setDate(movie1.getDate());
-											movie.setMovieName(movie1.getMovieName());
-											movie.setBoxOffice(movie1.getBoxOffice() + movie2.getBoxOffice());
-											return movie;
-										}
-									})
-									// 取tuple的第二个参数，映射为movie对象
-									.map(new Function<Tuple2<String, Movie>, Movie>() {
-										@Override
-										public Movie call(Tuple2<String, Movie> tuple) throws Exception {
-											return tuple._2();
-										}
-									}).collect();
+				public Movie call(String line) throws Exception {
+					return new Gson().fromJson(line, Movie.class);
+				}
+			});
+
+			movieDStream.foreachRDD(new VoidFunction<JavaRDD<Movie>>() {
+				@Override
+				public void call(JavaRDD<Movie> javaRDD) throws Exception {
+					ExecutorService streamingJobThreadPool = Executors.newFixedThreadPool(3);
+					Future<List<Movie>> dailyBoxOfficeTask = streamingJobThreadPool.submit(new Callable<List<Movie>>() {
+						@Override
+						public List<Movie> call() throws Exception {
+							return SparkUtil.this.computeMovieDailyBoxOffice(javaRDD);
+						}
+					});
+					Future<List<Movie>> genreTask = streamingJobThreadPool.submit(new Callable<List<Movie>>() {
+						@Override
+						public List<Movie> call() throws Exception {
+							return SparkUtil.this.computeByGenre(javaRDD);
+						}
+					});
+					Future<List<Movie>> cityTask = streamingJobThreadPool.submit(new Callable<List<Movie>>() {
+						@Override
+						public List<Movie> call() throws Exception {
+							return SparkUtil.this.computeByCity(javaRDD);
+						}
+					});
+					List<Movie> movies = dailyBoxOfficeTask.get();
 					// 电影类型
-					List<Movie> genreMovies = SparkUtil.this.computeByGenre(javaRDD);
-					// 出品国家
-//				List<Movie> countryMovies=SparkUtil.this.computeByCountry(javaRDD);
+					List<Movie> genreMovies = genreTask.get();
 					// 观影地区
-					List<Movie> cityMovies = SparkUtil.this.computeByCity(javaRDD);
+					List<Movie> cityMovies = cityTask.get();
 
-					// System.out.println("xxx:"+genreMovies.size());
-
+					streamingJobThreadPool.shutdown();
 
 					if (genreMovies.size() > 0)
 						queueUtil.pushList(new MovieList(genreMovies, new ArrayList<>(), cityMovies));
@@ -119,31 +114,56 @@ public class SparkUtil implements Serializable
 			SparkUtil.this.startStreamingContext();
 		}).start();
 	}
+
+	private List<Movie> computeMovieDailyBoxOffice(JavaRDD<Movie> moviesRDD) {
+		Collection<Movie> movies =
+				moviesRDD
+						// 按电影ID和movie对象映射为pair
+						.mapToPair(new PairFunction<Movie, Integer, Movie>() {
+							@Override
+							public Tuple2<Integer, Movie> call(Movie movie) throws Exception {
+								return new Tuple2<>(movie.getMovieID(), movie);
+							}
+						})
+						// 按电影名对两个movie对象求票房的和
+						.reduceByKey(new Function2<Movie, Movie, Movie>() {
+							@Override
+							public Movie call(Movie movie1, Movie movie2) throws Exception {
+								Movie movie = new Movie();
+								movie.setDate(movie1.getDate());
+								movie.setMovieName(movie1.getMovieName());
+								movie.setBoxOffice(movie1.getBoxOffice() + movie2.getBoxOffice());
+								return movie;
+							}
+						})
+						// 取tuple的第二个参数，映射为movie对象
+						.map(new Function<Tuple2<Integer, Movie>, Movie>() {
+							@Override
+							public Movie call(Tuple2<Integer, Movie> tuple) throws Exception {
+								return tuple._2();
+							}
+						}).collect();
+		return new ArrayList<>(movies);
+	}
 	
-	private List<Movie> computeByGenre(JavaRDD<String> javaRDD)
+	private List<Movie> computeByGenre(JavaRDD<Movie> javaRDD)
 	{
-			
 		Collection<Movie> movies=
-			// 将一行json字符串映射为一个movie对象
-			javaRDD.map(new Function<String, Movie>() {
-						@Override
-						public Movie call(String line) throws Exception {
-							return new Gson().fromJson(line, Movie.class);
-						}
-					})
+			javaRDD
 			// 按电影类型列表扩充movie的RDD
 			.flatMap(new FlatMapFunction<Movie, Movie>() {
 				@Override
 				public Iterator<Movie> call(Movie movie) throws Exception {
-					return movie.getGenre().stream()
-							.map(new java.util.function.Function<String, Movie>() {
-								@Override
-								public Movie apply(String genre) {
-									Movie newMovie = new Movie(movie);
-									newMovie.setGenre(Collections.singletonList(genre));
-									return newMovie;
-								}
-							}).iterator();
+					ArrayList<Movie> genreMappedMovies = new ArrayList<>(movie.getGenre().size());
+					for (String genre : movie.getGenre()) {
+						Movie genreMappedMovie = new Movie();
+						genreMappedMovie.setMovieName(movie.getMovieName());
+						genreMappedMovie.setAudience(movie.getAudience());
+						genreMappedMovie.setDate(movie.getDate());
+						genreMappedMovie.setGenre(Arrays.asList(genre));
+						genreMappedMovies.add(genreMappedMovie);
+					}
+					return genreMappedMovies.iterator();
 				}
 			})
 			// 按电影类型和movie对象映射为pair
@@ -175,71 +195,11 @@ public class SparkUtil implements Serializable
 		return new ArrayList<>(movies);
 	}
 	
-	private List<Movie> computeByCountry(JavaRDD<String> javaRDD)
+	private List<Movie> computeByCity(JavaRDD<Movie> javaRDD)
 	{
 		Collection<Movie> movies=
 			// 将一行json字符串映射为一个movie对象
-			javaRDD.map(new Function<String, Movie>() {
-						@Override
-						public Movie call(String line) throws Exception {
-							return new Gson().fromJson(line, Movie.class);
-						}
-					})
-			// 按出品国家列表扩充movie的RDD
-			.flatMap(new FlatMapFunction<Movie, Movie>() {
-				@Override
-				public Iterator<Movie> call(Movie movie) throws Exception {
-					List<Movie> movieList = movie.getCountry().stream()
-							.map(new java.util.function.Function<String, Movie>() {
-								@Override
-								public Movie apply(String country) {
-									Movie newMovie = new Movie(movie);
-									newMovie.setCountry(Collections.singletonList(country));
-									return newMovie;
-								}
-							}).collect(Collectors.toList());
-					return movieList.iterator();
-				}
-			})
-			// 按出品国家和movie对象映射为pair
-			.mapToPair(new PairFunction<Movie, String, Movie>() {
-				@Override
-				public Tuple2<String, Movie> call(Movie movie) throws Exception {
-					return new Tuple2<>(movie.getCountry().get(0), movie);
-				}
-			})
-			// 按出品国家对两个movie对象求观众数的和
-			.reduceByKey(new Function2<Movie, Movie, Movie>() {
-				@Override
-				public Movie call(Movie movie1, Movie movie2) throws Exception {
-					Movie movie = new Movie();
-					movie.setDate(movie1.getDate());
-					movie.setCountry(movie1.getCountry());
-					movie.setAudience(movie1.getAudience() + movie2.getAudience());
-					return movie;
-				}
-			})
-			// 取tuple的第二个参数，映射为movie对象
-			.map(new Function<Tuple2<String, Movie>, Movie>() {
-				@Override
-				public Movie call(Tuple2<String, Movie> tuple) throws Exception {
-					return tuple._2();
-				}
-			}).collect();
-		
-		return new ArrayList<>(movies);
-	}
-	
-	private List<Movie> computeByCity(JavaRDD<String> javaRDD)
-	{
-		Collection<Movie> movies=
-			// 将一行json字符串映射为一个movie对象
-			javaRDD.map(new Function<String, Movie>() {
-						@Override
-						public Movie call(String line) throws Exception {
-							return new Gson().fromJson(line, Movie.class);
-						}
-					})
+			javaRDD
 			// 按疫情相关的城市过滤
 			.filter(new Function<Movie, Boolean>() {
 				@Override
@@ -297,4 +257,6 @@ public class SparkUtil implements Serializable
 			e.printStackTrace();
 		}
 	}
+
+	private static final long serialVersionUID = 999L;
 }
