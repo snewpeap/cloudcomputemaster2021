@@ -34,8 +34,8 @@ public class StreamingController
 	public int startSocket()
 	{
 		//socketUtil.startSocket();
-		if(sparkUtil.notStarted() && queueUtil.empty()) {
-			sparkUtil.startMonitorHdfs();
+		if(hdfsComponent.notStarted()) {
+			// sparkUtil.startMonitorHdfs();
 			hdfsComponent.modifyFile();
 		}
 		
@@ -51,8 +51,8 @@ public class StreamingController
 	@RequestMapping("/startMonitor")
 	public int startMonitor()
 	{
-		if(sparkUtil.notStarted() && queueUtil.listEmpty()) {
-			sparkUtil.startMonitorHdfs();
+		if(hdfsComponent.notStarted()) {
+			// sparkUtil.startMonitorHdfs();
 			hdfsComponent.modifyFile();
 		}
 		

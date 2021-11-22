@@ -14,19 +14,23 @@ public class HdfsComponent
 	
 	@Value("${hadoop.conf.dir}")
 	private String dir;
-	
+
 	@Autowired
-	private SocketUtil socketUtil;
+	private QueueUtil queueUtil;
 	
 	public int modifyFile()
 	{
 		try {
-			new HdfsUtil(dir).modifyTime(directory);
+			queueUtil.dequeueAll();
+			HdfsUtil.instance(dir).modifyTime(directory);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		return 1;
-		//return socketUtil.startSocket();
 	}
+
+	public boolean notStarted() {
+		return !HdfsUtil.RunStatHolder.isRunning;
+    }
 }

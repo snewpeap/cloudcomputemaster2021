@@ -43,4 +43,9 @@ public class QueueUtil implements Serializable
 	public synchronized boolean listEmpty(){
 		return movieListQueue.isEmpty();
 	}
+
+	synchronized void dequeueAll() {
+		movieQueue.clear();
+		movieListQueue.clear();
+	}
 }

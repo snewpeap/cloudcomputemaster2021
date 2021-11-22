@@ -17,6 +17,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 @Component
 public class SparkUtil implements Serializable
 {
@@ -44,12 +46,16 @@ public class SparkUtil implements Serializable
 	// 疫情相关的城市
 	private static final List<String> cities=Arrays.asList("南京市", "郑州市", "张家界市", "上海市", "广州市");
 
+	@PostConstruct
+	public void postConstruct() {
+		startMonitorHdfs();
+	}
+
 	public void startMonitorHdfs()
 	{
 		count=0;
 		
 		new Thread(() -> {
-			RunStatHolder.isRunning = true;
 			SparkUtil.this.javaStreamingContext = sparkConfig.getStreamingContext();
 			JavaDStream<String> lines = javaStreamingContext.textFileStream(directory);
 			//JavaDStream<String> lines=javaStreamingContext.socketTextStream(hostname, port);
@@ -104,8 +110,8 @@ public class SparkUtil implements Serializable
 						queueUtil.pushList(new MovieList(genreMovies, new ArrayList<>(), cityMovies));
 					if (movies.size() > 0)
 						queueUtil.push(new ArrayList<>(movies));
-					if (movies.size() == 0 && genreMovies.size() == 0) // 超时
-						SparkUtil.this.checkTimeout();
+					// if (movies.size() == 0 && genreMovies.size() == 0) // 超时
+					// 	SparkUtil.this.checkTimeout();
 				}
 			});
 
@@ -279,7 +285,6 @@ public class SparkUtil implements Serializable
 		{
 			System.out.println(count+", "+timeoutSecond);
 			javaStreamingContext.stop(false);
-			RunStatHolder.isRunning = false;
 		}
 	}
 	
@@ -291,14 +296,5 @@ public class SparkUtil implements Serializable
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		RunStatHolder.isRunning = false;
 	}
-
-	public boolean notStarted() {
-		return !RunStatHolder.isRunning;
-    }
-
-	private static class RunStatHolder {
-        static boolean isRunning = false;
-    }
 }

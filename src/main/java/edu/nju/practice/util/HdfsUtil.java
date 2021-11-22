@@ -25,7 +25,7 @@ public class HdfsUtil {
      * 初始化，加载hadoop配置信息
      * @throws Exception
      */
-    public HdfsUtil(String dir) throws IOException{
+    private HdfsUtil(String dir) throws IOException{
         //读取classpath下的xxx-site.xml 配置文件，并解析其内容，封装到conf对象中
         Configuration conf = new Configuration(false);
         //添加本地配置
@@ -43,6 +43,7 @@ public class HdfsUtil {
      */
     public void modifyTime(String path) throws IOException{
         //获取hdfs的path文件夹下所有文件的信息
+        RunStatHolder.isRunning = true;
         FileStatus[] listStatus = fs.listStatus(new Path(path));
         //按文件名字典排序
         Arrays.sort(listStatus, (o1, o2) -> o1.getPath().getName().compareTo(o2.getPath().getName()));
@@ -66,11 +67,29 @@ public class HdfsUtil {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    RunStatHolder.isRunning = false;
                 }
             }
         }, MODIFY_TIME, MODIFY_TIME);
     }
 
+    private static HdfsUtil instance = null;
+
+    public static final HdfsUtil instance(String hdfsDir) throws IOException {
+        if(instance == null) {
+            synchronized(HdfsUtil.class) {
+                if(instance == null) {
+                    instance = new HdfsUtil(hdfsDir);
+                }
+            }
+        }
+        return instance;
+    }
+
+	public static class RunStatHolder {
+        static boolean isRunning = false;
+    }
 
 //    //测试用的
 //    /**
