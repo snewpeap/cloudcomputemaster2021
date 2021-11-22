@@ -117,7 +117,49 @@
 					urls: [
 						'/api/startSocket',
 						'/api/getStreamingData'
-					]
+					],
+					option1:{
+						  	xAxis: {
+						    	max: 'dataMax'
+						  	},
+						  	yAxis: {
+							    type: 'category',
+							    inverse: true,
+							    animationDuration: 300,
+							    animationDurationUpdate: 300,
+						  	},
+						  	series: [
+						    	{
+								    realtimeSort: true,
+								    type: 'bar',
+								    data: this.data,
+								    label: {
+								        show: true,
+								        position: 'right',
+								        valueAnimation: true
+								    }
+						    	}
+						  	],
+						  	animationDuration: 0,
+						 	animationDurationUpdate: 3000,
+						  	animationEasing: 'linear',
+						  	animationEasingUpdate: 'linear',
+						  	graphic: {
+						      	elements: [
+						        	{
+						          		type: 'text',
+						          		top: 0,
+						          		right: 70,
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		},
+						          		z: 100
+						        	}
+						      	]
+						    }
+						}
 				},
 				methods: {
 					startSocket: function() {
@@ -163,7 +205,6 @@
 					initChart: function() {
 						var myChart = echarts.init(document.getElementById('main'));
 						var option=this.getOption();
-						
 						setTimeout(function () {
 						  	app.getStreamingData();
 						}, 0);
@@ -177,58 +218,14 @@
 						  		}
 						  	}
 						}, 1000);
-						
+
+						this.option1.elements.style.text = this.newData[0].date,        
 						myChart.setOption(option);
+
 					},
 					getOption: function() {
-						var option = {
-							grid: {
-						      	left: 180,
-						      	right: 180
-						    },
-						  	xAxis: {
-						    	max: 'dataMax'
-						  	},
-						  	yAxis: {
-							    type: 'category',
-							    inverse: true,
-							    animationDuration: 300,
-							    animationDurationUpdate: 300,
-						  	},
-						  	series: [
-						    	{
-								    realtimeSort: true,
-								    type: 'bar',
-								    data: this.data,
-								    label: {
-								        show: true,
-								        position: 'right',
-								        valueAnimation: true
-								    }
-						    	}
-						  	],
-						  	animationDuration: 0,
-						 	animationDurationUpdate: 3000,
-						  	animationEasing: 'linear',
-						  	animationEasingUpdate: 'linear',
-						  	graphic: {
-						      	elements: [
-						        	{
-						          		type: 'text',
-						          		top: 0,
-						          		right: 70,
-						          		style: {
-								            text: '',
-								            font: 'bolder 50px monospace',
-								            fill: 'rgba(100, 100, 100, 0.25)'
-						          		},
-						          		z: 100
-						        	}
-						      	]
-						    }
-						};
-						
-						return option;
+						//
+						return this.option1;
 					},
 					getColor: function(name) {
 						if(!this.colorMap[name]) {
@@ -241,12 +238,19 @@
 						for(var i=0; i<this.newData.length; i++) {
 							if(this.nameMap[this.newData[i].movieName]) {
 								for(var k=0; k<this.data.length; k++) {
-									if(this.data[k].movieName==this.newData[i].movieName) {
+
+									if(this.data[k].movieName==this.newData[i].movieName){
 										this.data[k].date=this.newData[i].date;
-										this.data[k].boxOffice+=this.newData[i].boxOffice;
+										this.data[k].boxOffice=this.newData[i].boxOffice;
 										this.nameValue[k]=this.data[k].boxOffice.toFixed(2);
 										break;
 									}
+									// if(this.data[k].movieName==this.newData[i].movieName) {
+									// 	this.data[k].date=this.newData[i].date;
+									// 	this.data[k].boxOffice+=this.newData[i].boxOffice;
+									// 	this.nameValue[k]=this.data[k].boxOffice.toFixed(2);
+									// 	break;
+									// }
 								}
 							} else {
 								this.nameMap[this.newData[i].movieName]=true;
@@ -258,29 +262,9 @@
 						}
 						
 						var myChart = echarts.init(document.getElementById('main'));
-						myChart.setOption({
-							yAxis: {
-								data: this.nameKey,
-								max: this.nameKey.length<10?this.nameKey.length-1:10
-							},
-							series: [
-							    {
-							       type: 'bar',
-							       data: this.nameValue,
-							    }
-						   	],
-						   	graphic: {
-						      	elements: [
-						        	{
-						          		style: {
-								            text: this.newData[0].date,
-								            font: 'bolder 50px monospace',
-								            fill: 'rgba(100, 100, 100, 0.25)'
-						          		}
-						        	}
-						      	]
-						    }
-						});
+						this.option1.yAxis.max = this.nameKey.length<10?this.nameKey.length-1:10;
+						this.option1.yAxis.data = this.nameKey;
+						myChart.setOption(this.option1);
 					},
 				},
 				mounted() {
