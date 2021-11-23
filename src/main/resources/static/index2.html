@@ -286,13 +286,14 @@
 						  		if(cnt>50) {
 						  			clearInterval(timer);
 						  		}
-						  	}else if(app.newData[0].date == '2021-11-11'){
+						  	}else if(app.newData2[0].date == '2021-11-11'){
 								clearInterval(timer);
 								//截止到11-11
 							}
 						}, 1000);
 						myChart.setOption(option);
 						myChart2.setOption(option3);
+						app.newData = [];
 					},
 					getOption2: function() {
 						var Tself = this;
@@ -335,18 +336,44 @@
 					updateData2: function() {
 						//取city, audience, date
 						//算audience每天的然后依次push到对应的城市项
+						var tag1 = false;
+						var tag2 = false;
+						var tag3 = false;
+						var tag4 = false;
+						var tag5 = false;
 						for(var i=0; i<this.newData2.length; i++) {
 							if(this.newData2[i].city == '南京市') {
 								this.nanjing.push(this.newData2[i].audience);
+								tag1 = true;
 							}else if (this.newData2[i].city == '郑州市'){
 								this.zhengzhou.push(this.newData2[i].audience);
+								tag2 = true;
 							}else if (this.newData2[i].city== '张家界市'){
 								this.zhangjiajie.push(this.newData2[i].audience);
+								tag3 = true;
 							}else if (this.newData2[i].city == '上海市'){
 								this.shanghai.push(this.newData2[i].audience);
+								tag4 = true;
 							}else if (this.newData2[i].city== '广州市'){
 								this.guangzhou.push(this.newData2[i].audience);
+								tag5 = true;
 							}
+						}
+						//	填充0
+						if(!tag1){
+							this.nanjing.push(0);
+						}
+						if(!tag2){
+							this.zhengzhou.push(0);
+						}
+						if(!tag3){
+							this.zhangjiajie.push(0);
+						}
+						if(!tag4){
+							this.shanghai.push(0);
+						}
+						if(!tag5){
+							this.guangzhou.push(0);
 						}
 					
 						var myChart = echarts.init(document.getElementById('main'));
