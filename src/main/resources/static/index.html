@@ -128,7 +128,7 @@
 								data: this.nameKey,
 							    animationDuration: 300,
 							    animationDurationUpdate: 300,
-								max:this.nameKey.length<10?this.nameKey.length-1:10
+								max:5
 						  	},
 						  	series: [
 						    	{
@@ -224,7 +224,7 @@
 						}, 1000);
 
 						this.option1.elements.style.text = this.newData[0].date,        
-						myChart.setOption(option);
+						myChart.setOption(this.option1);
 
 					},
 					getOption: function() {
@@ -264,6 +264,9 @@
 							}
 						}
 						var myChart = echarts.init(document.getElementById('main'));
+						this.option1.series.max = this.nameKey.length<10?this.nameKey.length-1:10;
+						this.option1.yAxis.data = this.nameKey;
+						this.option1.xAxis.data = this.nameValue;
 						myChart.setOption(this.option1);
 						
 					},
