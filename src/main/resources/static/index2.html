@@ -93,6 +93,9 @@
 								<div class="box">
 									<input type="button" value="开始监听HDFS" v-on:click="startSocket()" />
 									<div id="main" style="width: 100%; height:90%;"></div>
+									<Divider></Divider>
+									<div id="main2" style="width: 100%; height:90%;"></div>
+									
 								</div>
 							</div>
 						</div>
@@ -211,7 +214,19 @@
 					urls: [
 						'api/startMonitor',
 						'api/getStreamingDataList'
-					]
+					],
+
+					//merge
+					data3: [],
+					new_datas3:[],
+					newData3: [],
+					nameMap3: {},
+					nameKey3: [],
+					nameValue3: [],
+					day3: 1,
+					colors3: ["red", "orange", "yellow", "green", "blue"],
+					colorMap3: {},
+					colorIndex3: 0,
 				},
 				methods: {
 					startSocket: function() {
@@ -223,6 +238,7 @@
 		                   	console.log(res.body);
 		                   	if(res.body==1) {
 		                   		app.initChart2();
+								//app.initChart3();合并
 		                   	} else {
 		                   		alert("监听HDFS失败！");
 		                   	}
@@ -239,12 +255,16 @@
 		                	console.log(res.body);
 		                   	if(res.body) {
 		                   		app.newData2=res.body.cityMovies;
+								app.newData3=res.body.genreMovies;
 			                   	if(app.newData2.length>0) {
 			                   		console.log(app.newData2);
+									console.log(app.newData3);
 			                   		app.updateData2();
+									app.updateData3();
 			                   	}
 		                   	} else {
 		                   		app.newData2=[];
+								app.newData3=[];
 		                   	}
 		                },function(res){
 		                    console.log(res);
@@ -253,7 +273,8 @@
 					initChart2: function() {
 						var myChart = echarts.init(document.getElementById('main'));
 						var option=this.getOption2();
-						
+						var myChart2 = echarts.init(document.getElementById('main2'));
+						var option3=this.getOption3();
 						setTimeout(function () {
 						  	app.getStreamingData2();
 						}, 0);
@@ -261,20 +282,48 @@
 						var timer=setInterval(function () {
 						  	app.getStreamingData2();
 						  	if(app.newData2.length==0) {
-								  
 						  		cnt++;
 						  		if(cnt>50) {
 						  			clearInterval(timer);
 						  		}
-						  	}
+						  	}else if(app.newData[0].date == '2021-11-11'){
+								clearInterval(timer);
+								//截止到11-11
+							}
 						}, 1000);
-
 						myChart.setOption(option);
+						myChart2.setOption(option3);
 					},
 					getOption2: function() {
 						var Tself = this;
-						
 						return this.option2;
+					},
+					getOption3: function() {
+						var option = {
+							series: [
+								{
+								type: 'pie',
+								radius: [0, '50%'],
+								data: this.new_datas3
+								}
+							],
+							graphic: {
+						      	elements: [
+						        	{
+										type: 'text',
+						          		top: 0,
+						          		right: 70,
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		},
+										z: 100
+						        	}
+						      	]
+						    }
+						};
+						return option;
 					},
 					getColor: function(name) {
 						if(!this.colorMap[name]) {
@@ -301,7 +350,6 @@
 						}
 					
 						var myChart = echarts.init(document.getElementById('main'));
-
 						this.dates2.push(this.newData2[0].date);
 						this.option2.xAxis.data = this.dates2;
                 		this.option2.series[0].data = this.nanjing;
@@ -310,8 +358,56 @@
 						this.option2.series[3].data = this.shanghai;
 						this.option2.series[4].data = this.guangzhou;
                 		myChart.setOption(this.option2);
-				
-					
+					},
+					updateData3: function() {
+						//
+						//取genre[0]作为categroy,audience作为数量
+						for(var i=0; i<this.newData3.length; i++) {
+							if(this.nameMap3[this.newData3[i].genre[0]]) {
+								for(var k=0; k<this.data3.length; k++) {
+									if(this.data3[k].genre[0]==this.newData3[i].genre[0]) {
+										this.data3[k].date=this.newData3[i].date;
+										this.data3[k].audience+=this.newData3[i].audience;
+										this.nameValue3[k]=this.data3[k].audience;
+										break;
+									}
+								}
+							} else {
+								this.nameMap3[this.newData3[i].genre[0]]=true;
+								this.nameKey3.push(this.newData3[i].genre[0]);
+								// 深复制
+								this.data3.push(JSON.parse(JSON.stringify(this.newData3[i])));
+								this.nameValue3.push(this.newData3[i].audience);
+							}
+						}
+						//data=[{value,name}]
+						this.new_datas3 = [];
+						for(var i=0;i<this.nameValue3.length;i++){
+							var dp = {name:this.nameKey3[i],value:this.nameValue3[i]};
+							this.new_datas3.push(JSON.parse(JSON.stringify(dp)));
+						}
+						var myChart = echarts.init(document.getElementById('main2'));
+						console.log(this.new_datas3);
+						myChart.setOption({
+							series: [
+							    {
+							       type: 'pie',
+							       data: this.new_datas3,
+								   radius: [0, '50%'],
+							    }
+						   	],
+						   	graphic: {
+						      	elements: [
+						        	{
+						          		style: {
+								            text: this.newData3[0].date,
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		}
+						        	}
+						      	]
+						    }
+						});
 					},
 				},
 				mounted() {
