@@ -125,14 +125,16 @@
 						  	yAxis: {
 							    type: 'category',
 							    inverse: true,
+								data: this.nameKey,
 							    animationDuration: 300,
 							    animationDurationUpdate: 300,
+								max:this.nameKey.length<10?this.nameKey.length-1:10
 						  	},
 						  	series: [
 						    	{
 								    realtimeSort: true,
 								    type: 'bar',
-								    data: this.data,
+								    data: this.nameValue,
 								    label: {
 								        show: true,
 								        position: 'right',
@@ -216,7 +218,9 @@
 						  		if(cnt>50) {
 						  			clearInterval(timer);
 						  		}
-						  	}
+						  	}else if(app.newData[0].date == '2021-11-11'){
+								clearInterval(timer);
+							}
 						}, 1000);
 
 						this.option1.elements.style.text = this.newData[0].date,        
@@ -224,7 +228,7 @@
 
 					},
 					getOption: function() {
-						//
+						
 						return this.option1;
 					},
 					getColor: function(name) {
@@ -238,10 +242,9 @@
 						for(var i=0; i<this.newData.length; i++) {
 							if(this.nameMap[this.newData[i].movieName]) {
 								for(var k=0; k<this.data.length; k++) {
-
 									if(this.data[k].movieName==this.newData[i].movieName){
 										this.data[k].date=this.newData[i].date;
-										this.data[k].boxOffice=this.newData[i].boxOffice;
+										this.data[k].boxOffice+=this.newData[i].boxOffice;
 										this.nameValue[k]=this.data[k].boxOffice.toFixed(2);
 										break;
 									}
@@ -260,11 +263,9 @@
 								this.nameValue.push(this.newData[i].boxOffice.toFixed(2));
 							}
 						}
-						
 						var myChart = echarts.init(document.getElementById('main'));
-						this.option1.yAxis.max = this.nameKey.length<10?this.nameKey.length-1:10;
-						this.option1.yAxis.data = this.nameKey;
 						myChart.setOption(this.option1);
+						
 					},
 				},
 				mounted() {
