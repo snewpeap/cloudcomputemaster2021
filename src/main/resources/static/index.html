@@ -223,7 +223,6 @@
 							}
 						}, 1000);
 
-						this.option1.elements.style.text = this.newData[0].date,        
 						myChart.setOption(this.option1);
 
 					},
@@ -265,8 +264,9 @@
 						}
 						var myChart = echarts.init(document.getElementById('main'));
 						this.option1.series.max = this.nameKey.length<10?this.nameKey.length-1:10;
+						this.option1.graphic.elements[0].style.text = this.newData[0].date,  
 						this.option1.yAxis.data = this.nameKey;
-						this.option1.xAxis.data = this.nameValue;
+						this.option1.series[0].data = this.nameValue;
 						myChart.setOption(this.option1);
 						
 					},
