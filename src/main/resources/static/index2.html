@@ -23,7 +23,7 @@
 				bottom: 0;
 				margin: auto;
 				width: 60%;
-				height: 80%;
+				height: 100%;
 			}
 			.box input[type="button"] {
 				width: 100px;
@@ -394,7 +394,7 @@
 								for(var k=0; k<this.data3.length; k++) {
 									if(this.data3[k].genre[0]==this.newData3[i].genre[0]) {
 										this.data3[k].date=this.newData3[i].date;
-										this.data3[k].audience+=this.newData3[i].audience;
+										this.data3[k].audience=this.newData3[i].audience;
 										this.nameValue3[k]=this.data3[k].audience;
 										break;
 									}
