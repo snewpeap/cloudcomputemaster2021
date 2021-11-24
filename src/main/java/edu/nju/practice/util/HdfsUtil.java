@@ -3,6 +3,7 @@ package edu.nju.practice.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -47,6 +48,7 @@ public class HdfsUtil {
         FileStatus[] listStatus = fs.listStatus(new Path(path));
         //按文件名字典排序
         Arrays.sort(listStatus, (o1, o2) -> o1.getPath().getName().compareTo(o2.getPath().getName()));
+        final Iterator<FileStatus> fileStatusIterator = Arrays.asList(listStatus).iterator();
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -54,21 +56,19 @@ public class HdfsUtil {
             @Override
             public void run() {
                 try {
-                    if(i < listStatus.length) {
-                        Path filepath = listStatus[i].getPath();
-                        if (filepath.toString().endsWith(".jl") == true) {
+                    if(fileStatusIterator.hasNext()) {
+                        Path filepath = fileStatusIterator.next().getPath();
+                        if (filepath.toString().endsWith(".jl")) {
                             long currentTime = System.currentTimeMillis();
                             fs.setTimes(filepath, currentTime, -1);
                         }
-                        i++;
                     }
                     else {
+                        RunStatHolder.isRunning = false;
                         timer.cancel();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    RunStatHolder.isRunning = false;
                 }
             }
         }, MODIFY_TIME, MODIFY_TIME);
