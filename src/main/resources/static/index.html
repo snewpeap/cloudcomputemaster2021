@@ -85,7 +85,7 @@
 					<Breadcrumb :style="{margin: '20px 0'}">
 						<a>单部电影票房</a>&nbsp;&nbsp;&nbsp;&nbsp;
        	 				<a href="/index2.html">部分城市观影情况</a>&nbsp;&nbsp;&nbsp;&nbsp;
-							<a href="/index3.html">观影类型情况</a>
+						
 					</Breadcrumb>
 					<Card>
 						<div style="min-height: 400px;">
@@ -126,8 +126,8 @@
 							    type: 'category',
 							    inverse: true,
 								data: this.nameKey,
-							    animationDuration: 300,
-							    animationDurationUpdate: 300,
+							    animationDuration: 1000,
+							    animationDurationUpdate: 1000,
 								max:5
 						  	},
 						  	series: [
@@ -143,7 +143,7 @@
 						    	}
 						  	],
 						  	animationDuration: 0,
-						 	animationDurationUpdate: 3000,
+						 	animationDurationUpdate: 1000,
 						  	animationEasing: 'linear',
 						  	animationEasingUpdate: 'linear',
 						  	graphic: {
@@ -224,6 +224,7 @@
 						}, 1000);
 
 						myChart.setOption(this.option1);
+						app.newData = [];
 
 					},
 					getOption: function() {
@@ -267,6 +268,8 @@
 						this.option1.graphic.elements[0].style.text = this.newData[0].date,  
 						this.option1.yAxis.data = this.nameKey;
 						this.option1.series[0].data = this.nameValue;
+						myChart.clear();
+						//???
 						myChart.setOption(this.option1);
 						
 					},

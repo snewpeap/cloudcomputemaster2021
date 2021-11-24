@@ -85,16 +85,16 @@
 					<Breadcrumb :style="{margin: '20px 0'}">
 						<a href="/index.html">单部电影票房</a>&nbsp;&nbsp;&nbsp;&nbsp;
        	 				<a>部分城市观影情况</a>&nbsp;&nbsp;&nbsp;&nbsp;
-							<a href="/index3.html">观影类型情况</a>
+					
 					</Breadcrumb>
 					<Card>
 						<div style="min-height: 400px;">
 							<div id="app">
 								<div class="box">
 									<input type="button" value="开始监听HDFS" v-on:click="startSocket()" />
-									<div id="main" style="width: 100%; height:90%;"></div>
-									<Divider></Divider>
-									<div id="main2" style="width: 100%; height:90%;"></div>
+									<div id="main" style="width: 100%; height:40%;float: left;"></div>
+									<div style="width: 100%;height:40%;float: left;"></div>
+									<div id="main2" style="width: 100%; height:40%;float: left;"></div>
 									
 								</div>
 							</div>
@@ -188,7 +188,7 @@
 								}
 							],
 							animationDuration: 0,
-						 	animationDurationUpdate: 3000,
+						 	animationDurationUpdate: 1000,
 						  	animationEasing: 'linear',
 						  	animationEasingUpdate: 'linear',
 						  	graphic: {
