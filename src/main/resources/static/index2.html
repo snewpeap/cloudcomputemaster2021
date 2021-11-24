@@ -9,8 +9,8 @@
 				padding: 0px;
 			}
 			html, body, #app {
-				height: 100%;
-				width: 100%;
+				/* height: 100%;
+				width: 100%; */
 			}
 			#app {
 				text-align: center;
@@ -36,9 +36,8 @@
 				border: 1px solid #38393a;
 				background: #f5f7f9;
 				position: relative;
-				height: 100%;
 				border-radius: 4px;
-				overflow: hidden;
+				/* overflow: hidden; */
 			}
 			.layout-logo{
 				width: 100px;
@@ -72,7 +71,7 @@
 
 	</head>
 	<body>
-		<div id="app" class="layout">
+		<div id='app' class="layout">
 			<Layout>
 				<Header style="min-height: 50px;background-color: #5b6270;">
 				
@@ -84,15 +83,15 @@
        	 				<a>部分城市观影情况</a>&nbsp;&nbsp;&nbsp;&nbsp;			
 					</Breadcrumb>
 					
-					<Card style="height: 550px;">
+					<Card style="height: 1000px;">
 							<div id="app">
 								<div class="box">
 										
 									<input type="button" value="开始监听HDFS" v-on:click="startSocket()" />
 									
-									<div id="main" style="margin-top:30px;width: 100%; min-height:200px;float: left;"></div>
+									<div id="main" style="margin-top:30px;width: 100%; min-height:400px;float: left;"></div>
 									<Divider></Divider>
-									<div id="main2" style="width: 100%; min-height:200px;float: left;"></div>
+									<div id="main2" style="width: 100%; min-height:400px;float: left;"></div>
 									
 								</div>
 							</div>
@@ -122,6 +121,17 @@
 					nameKey2: [],
 					nameValue2: [],
 					option2: {
+							graphic: {
+						      	elements: [
+						        	{
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		}
+						        	}
+						      	]
+						    },
 							legend:{
 								data:this.elements2,
 							},
@@ -142,7 +152,7 @@
 							},
 							yAxis: {
 								type: 'value',
-								name: '观众数',
+								name: '观影人次',
 								axisLabel: {
 									interval: 'auto',
 									formatter: '{value}'
@@ -212,7 +222,6 @@
 						'api/startMonitor',
 						'api/getStreamingDataList'
 					],
-
 					//merge
 					data3: [],
 					new_datas3:[],
@@ -224,27 +233,37 @@
 					colors3: ["red", "orange", "yellow", "green", "blue"],
 					colorMap3: {},
 					colorIndex3: 0,
+					zhanzheng:[],
+					xiju:[],
+					maoxian:[],
+					xuanyi:[],
+					jingsong:[],
+					juqing:[],
+					fanzui:[],
+					dongzuo:[],
+					zhuxuanlv:[],
+					lishi:[],
+					zhuanji:[],
+					qita:[],
 					option3:{
+						graphic: {
+						      	elements: [
+						        	{
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		}
+						        	}
+						      	]
+						    },
 						title: {
-							text: 'Stacked Area Chart'
+							text: ''
 						},
-						tooltip: {
-							trigger: 'axis',
-							axisPointer: {
-							type: 'cross',
-							label: {
-								backgroundColor: '#6a7985'
-							}
-							}
-						},
+						
 						legend: {
 							//这里为所有的geners
-							data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
-						},
-						toolbox: {
-							feature: {
-							saveAsImage: {}
-							}
+							data: ['战争', '喜剧', '冒险', '悬疑', '惊悚', '剧情', '犯罪', '动作', '主旋律', '历史', '传记']// '其他']
 						},
 						grid: {
 							left: '3%',
@@ -289,17 +308,17 @@
 					    },
 						series: [
 							{
-								name: 'Email',
+								name: '战争',
 								type: 'line',
 								stack: 'Total',
 								areaStyle: {},
 								emphasis: {
 									focus: 'series'
 								},
-								data: [120, 132, 101, 134, 90, 230, 210]
+								data: this.zhanzheng
 							},
 							{
-								name: 'Union Ads',
+								name: '喜剧',
 								type: 'line',
 								stack: 'Total',
 								smooth: true,
@@ -307,42 +326,125 @@
 								emphasis: {
 									focus: 'series'
 								},
-								data: [220, 182, 191, 234, 290, 330, 310]
+								data: this.xiju
 							},
 							{
-								name: 'Video Ads',
+								name: '冒险',
 								type: 'line',
 								stack: 'Total',
 								areaStyle: {},
 								emphasis: {
 									focus: 'series'
 								},
-								data: [150, 232, 201, 154, 190, 330, 410]
+								data: this.maoxian
 							},
 							{
-								name: 'Direct',
+								name: '悬疑',
 								type: 'line',
 								stack: 'Total',
 								areaStyle: {},
 								emphasis: {
 									focus: 'series'
 								},
-								data: [320, 332, 301, 334, 390, 330, 320]
+								data: this.xuanyi
 							},
 							{
-								name: 'Search Engine',
+								name: '惊悚',
 								type: 'line',
 								stack: 'Total',
-								label: {
-									show: true,
-									position: 'top'
-								},
+							
 								areaStyle: {},
 								emphasis: {
 									focus: 'series'
 								},
-								data: [820, 932, 901, 934, 1290, 1330, 1320]
+								data: this.jingsong
+								
+							},
+							{
+								name: '剧情',
+								type: 'line',
+								stack: 'Total',
+								
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.juqing
 							}
+							,
+							{
+								name: '犯罪',
+								type: 'line',
+								stack: 'Total',
+								
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.fanzui
+							}
+							,
+							{
+								name: '动作',
+								type: 'line',
+								stack: 'Total',
+								
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.dongzuo
+							}
+							,
+							{
+								name: '主旋律',
+								type: 'line',
+								stack: 'Total',
+								
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.zhuxuanlv
+							}
+							,
+							{
+								name: '历史',
+								type: 'line',
+								stack: 'Total',
+								
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.lishi
+							}
+							,
+							
+							{
+								name: '传记',
+								type: 'line',
+								stack: 'Total',
+								
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.zhuanji
+							}
+							// ,
+							// {
+							// 	name: '其他',
+							// 	type: 'line',
+							// 	stack: 'Total',
+								
+							// 	areaStyle: {},
+							// 	emphasis: {
+							// 		focus: 'series'
+							// 	},
+							// 	data: this.qita
+							// }
+
 						]
 					}
 				},
@@ -418,31 +520,31 @@
 						return this.option2;
 					},
 					getOption3: function() {
-						var option = {
-							series: [
-								{
-								type: 'pie',
-								radius: [0, '50%'],
-								data: this.new_datas3
-								}
-							],
-							graphic: {
-						      	elements: [
-						        	{
-										type: 'text',
-						          		top: 0,
-						          		right: 70,
-						          		style: {
-								            text: '',
-								            font: 'bolder 50px monospace',
-								            fill: 'rgba(100, 100, 100, 0.25)'
-						          		},
-										z: 100
-						        	}
-						      	]
-						    }
-						};
-						return option;
+						// var option = {
+						// 	series: [
+						// 		{
+						// 		type: 'pie',
+						// 		radius: [0, '50%'],
+						// 		data: this.new_datas3
+						// 		}
+						// 	],
+						// 	graphic: {
+						//       	elements: [
+						//         	{
+						// 				type: 'text',
+						//           		top: 0,
+						//           		right: 70,
+						//           		style: {
+						// 		            text: '',
+						// 		            font: 'bolder 50px monospace',
+						// 		            fill: 'rgba(100, 100, 100, 0.25)'
+						//           		},
+						// 				z: 100
+						//         	}
+						//       	]
+						//     }
+						// };
+						return this.option3;
 					},
 					getColor: function(name) {
 						if(!this.colorMap[name]) {
@@ -495,64 +597,124 @@
 						}
 					
 						var myChart = echarts.init(document.getElementById('main'));
-						this.dates2.push(this.newData2[0].date);
+						this.dates2.push(this.newData3[0].date);
 						this.option2.xAxis.data = this.dates2;
                 		this.option2.series[0].data = this.nanjing;
                 		this.option2.series[1].data = this.zhengzhou;
 						this.option2.series[2].data = this.zhangjiajie;
 						this.option2.series[3].data = this.shanghai;
 						this.option2.series[4].data = this.guangzhou;
+						this.option2.graphic.elements[0].style.text=this.newData3[0].date;
                 		myChart.setOption(this.option2);
 					},
 					updateData3: function() {
 						//
 						//取genre[0]作为categroy,audience作为数量
+						var tag11 = false;var tag12 = false;
+						var tag6 = false;var tag7 = false;var tag8 = false;var tag9 = false;var tag10 = false;
+						var tag1 = false;var tag2 = false;var tag3 = false;var tag4 = false;var tag5 = false;
+
+				
 						for(var i=0; i<this.newData3.length; i++) {
-							if(this.nameMap3[this.newData3[i].genre[0]]) {
-								for(var k=0; k<this.data3.length; k++) {
-									if(this.data3[k].genre[0]==this.newData3[i].genre[0]) {
-										this.data3[k].date=this.newData3[i].date;
-										this.data3[k].audience=this.newData3[i].audience;
-										this.nameValue3[k]=this.data3[k].audience;
-										break;
-									}
-								}
-							} else {
-								this.nameMap3[this.newData3[i].genre[0]]=true;
-								this.nameKey3.push(this.newData3[i].genre[0]);
-								// 深复制
-								this.data3.push(JSON.parse(JSON.stringify(this.newData3[i])));
-								this.nameValue3.push(this.newData3[i].audience);
+							if(this.newData3[i].genre[0] == '战争') {
+								this.zhanzheng.push(this.newData3[i].audience);
+								tag1 = true;
+							}else if (this.newData3[i].genre[0] == '喜剧'){
+								this.xiju.push(this.newData3[i].audience);
+								tag2 = true;
+							}else if (this.newData3[i].genre[0]== '冒险'){
+								this.maoxian.push(this.newData3[i].audience);
+								tag3 = true;
+							}else if (this.newData3[i].genre[0] == '悬疑'){
+								this.xuanyi.push(this.newData3[i].audience);
+								tag4 = true;
+							}else if (this.newData3[i].genre[0]== '惊悚'){
+								this.jingsong.push(this.newData3[i].audience);
+								tag5 = true;
+							}else if (this.newData3[i].genre[0]== '剧情'){
+								this.juqing.push(this.newData3[i].audience);
+								tag6 = true;
+							}else if (this.newData3[i].genre[0]== '犯罪'){
+								this.fanzui.push(this.newData3[i].audience);
+								tag7 = true;
+							}else if (this.newData3[i].genre[0]== '动作'){
+								this.dongzuo.push(this.newData3[i].audience);
+								tag8 = true;
+							}else if (this.newData3[i].genre[0]== '主旋律'){
+								this.zhuxuanlv.push(this.newData3[i].audience);
+								tag9 = true;
+							}else if (this.newData3[i].genre[0]== '历史'){
+								this.lishi.push(this.newData3[i].audience);
+								tag10 = true;
+							}else if (this.newData3[i].genre[0]== '传记'){
+								this.zhuanji.push(this.newData3[i].audience);
+								tag11 = true;
 							}
+							// else{
+								
+							// 	if(tag12){
+							// 		this.qita[this.qita.length -1 ] += this.newData3[i].audience;
+							// 	}else{
+							// 		this.qita.push(this.newData3[i].audience);
+							// 	}
+							// 	tag12 = true;
+							// }
 						}
+						//	填充0
+						//'战争', '喜剧', '冒险', '悬疑', '惊悚', '剧情', '犯罪', '动作', '主旋律', '历史', '传记', '其他'
+						if(!tag1){
+							this.zhanzheng.push(0);
+						}
+						else if(!tag2){
+							this.xiju.push(0);
+						}
+						else if(!tag3){
+							this.maoxian.push(0);
+						}
+						else if(!tag4){
+							this.xuanyi.push(0);
+						}
+						else if(!tag5){
+							this.jingsong.push(0);
+						}
+						else if(!tag6){
+							this.juqing.push(0);
+						}
+						else if(!tag7){
+							this.fanzui.push(0);
+						}
+						else if(!tag8){
+							this.dongzuo.push(0);
+						}
+						else if(!tag9){
+							this.zhuxuanlv.push(0);
+						}
+						else if(!tag10){
+							this.lishi.push(0);
+						}
+						else if(!tag11){
+							this.zhuanji.push(0);
+						}
+						// else if(!tag12){
+						// 	this.qita.push(0);
+						// }
 						//data=[{value,name}]
-						this.new_datas3 = [];
-						for(var i=0;i<this.nameValue3.length;i++){
-							var dp = {name:this.nameKey3[i],value:this.nameValue3[i]};
-							this.new_datas3.push(JSON.parse(JSON.stringify(dp)));
-						}
 						var myChart = echarts.init(document.getElementById('main2'));
-						console.log(this.new_datas3);
-						myChart.setOption({
-							series: [
-							    {
-							       type: 'pie',
-							       data: this.new_datas3,
-								   radius: [0, '50%'],
-							    }
-						   	],
-						   	graphic: {
-						      	elements: [
-						        	{
-						          		style: {
-								            text: this.newData3[0].date,
-								            font: 'bolder 50px monospace',
-								            fill: 'rgba(100, 100, 100, 0.25)'
-						          		}
-						        	}
-						      	]
-						    }
-						});
+						this.option3.xAxis.data = this.dates2;
+                		this.option3.series[0].data = this.zhanzheng;
+                		this.option3.series[1].data = this.xiju;
+						this.option3.series[2].data = this.maoxian;
+						this.option3.series[3].data = this.xuanyi;
+						this.option3.series[4].data = this.jingsong;
+						this.option3.series[5].data = this.juqing;
+						this.option3.series[6].data = this.fanzui;
+						this.option3.series[7].data = this.dongzuo;
+						this.option3.series[8].data = this.zhuxuanlv;
+						this.option3.series[9].data = this.lishi;
+						this.option3.series[10].data = this.zhuanji;
+						//this.option3.series[11].data = this.qita;
+						this.option3.graphic.elements[0].style.text=this.newData3[0].date;
+						myChart.setOption(this.option3);
 					},
 				},
 				mounted() {
