@@ -158,19 +158,20 @@ public class SparkUtil implements Serializable
 				@Override
 				public Iterator<Movie> call(Movie movie) throws Exception {
 					List<String> movieGenres = movie.getGenre();
-					if (movieGenres == null) {
-						Collections.emptyIterator();
+					Iterator<Movie> movieIterator = Collections.emptyIterator();
+					if (movieGenres != null) {
+						ArrayList<Movie> genreMappedMovies = new ArrayList<>(movieGenres.size());
+						for (String genre : movieGenres) {
+							Movie genreMappedMovie = new Movie();
+							genreMappedMovie.setMovieName(movie.getMovieName());
+							genreMappedMovie.setAudience(movie.getAudience());
+							genreMappedMovie.setDate(movie.getDate());
+							genreMappedMovie.setGenre(Arrays.asList(genre));
+							genreMappedMovies.add(genreMappedMovie);
+						}
+						movieIterator = genreMappedMovies.iterator();
 					}
-					ArrayList<Movie> genreMappedMovies = new ArrayList<>(movieGenres.size());
-					for (String genre : movieGenres) {
-						Movie genreMappedMovie = new Movie();
-						genreMappedMovie.setMovieName(movie.getMovieName());
-						genreMappedMovie.setAudience(movie.getAudience());
-						genreMappedMovie.setDate(movie.getDate());
-						genreMappedMovie.setGenre(Arrays.asList(genre));
-						genreMappedMovies.add(genreMappedMovie);
-					}
-					return genreMappedMovies.iterator();
+					return movieIterator;
 				}
 			})
 			// 按电影类型和movie对象映射为pair
