@@ -6,6 +6,7 @@ import edu.nju.practice.vo.Movie;
 import edu.nju.practice.vo.MovieList;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.*;
+import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +48,13 @@ public class SparkUtil implements Serializable
 	private static final String hostname="localhost";
 	
 	// 疫情相关的城市
-	private static final List<String> cities=Arrays.asList("南京市", "郑州市", "张家界市", "上海市", "广州市");
+	private static final List<String> filterCities=Arrays.asList("南京市", "郑州市", "张家界市", "上海市", "广州市");
+	private static Broadcast<List<String>> filterCitiesBroadcast;
 
 	@PostConstruct
 	public void postConstruct() {
+		javaStreamingContext = sparkConfig.getStreamingContext();
+		filterCitiesBroadcast = javaStreamingContext.sparkContext().broadcast(filterCities);
 		startMonitorHdfs();
 	}
 
@@ -59,7 +63,6 @@ public class SparkUtil implements Serializable
 		count=0;
 		
 		new Thread(() -> {
-			SparkUtil.this.javaStreamingContext = sparkConfig.getStreamingContext();
 			JavaDStream<String> lines = javaStreamingContext.textFileStream(directory);
 			//JavaDStream<String> lines=javaStreamingContext.socketTextStream(hostname, port);
 
@@ -90,7 +93,7 @@ public class SparkUtil implements Serializable
 					Future<List<Movie>> cityTask = streamingJobThreadPool.submit(new Callable<List<Movie>>() {
 						@Override
 						public List<Movie> call() throws Exception {
-							return SparkUtil.this.computeByCity(javaRDD);
+							return SparkUtil.this.computeByCity(javaRDD, filterCitiesBroadcast);
 						}
 					});
 					List<Movie> movies = dailyBoxOfficeTask.get();
@@ -154,8 +157,12 @@ public class SparkUtil implements Serializable
 			.flatMap(new FlatMapFunction<Movie, Movie>() {
 				@Override
 				public Iterator<Movie> call(Movie movie) throws Exception {
-					ArrayList<Movie> genreMappedMovies = new ArrayList<>(movie.getGenre().size());
-					for (String genre : movie.getGenre()) {
+					List<String> movieGenres = movie.getGenre();
+					if (movieGenres == null) {
+						Collections.emptyIterator();
+					}
+					ArrayList<Movie> genreMappedMovies = new ArrayList<>(movieGenres.size());
+					for (String genre : movieGenres) {
 						Movie genreMappedMovie = new Movie();
 						genreMappedMovie.setMovieName(movie.getMovieName());
 						genreMappedMovie.setAudience(movie.getAudience());
@@ -195,7 +202,7 @@ public class SparkUtil implements Serializable
 		return new ArrayList<>(movies);
 	}
 	
-	private List<Movie> computeByCity(JavaRDD<Movie> javaRDD)
+	private List<Movie> computeByCity(JavaRDD<Movie> javaRDD, final Broadcast<List<String>> filterCitiesBroadcast)
 	{
 		Collection<Movie> movies=
 			// 将一行json字符串映射为一个movie对象
@@ -204,7 +211,7 @@ public class SparkUtil implements Serializable
 			.filter(new Function<Movie, Boolean>() {
 				@Override
 				public Boolean call(Movie movie) throws Exception {
-					return cities.contains(movie.getCity());
+					return filterCitiesBroadcast.getValue().contains(movie.getCity());
 				}
 			})
 			// 按城市和movie对象映射为pair
