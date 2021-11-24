@@ -16,11 +16,7 @@
 				text-align: center;
 			}
 			.box {
-				position: absolute;
-				left: 0;
-				right: 0;
-				top: 0;
-				bottom: 0;
+				float: center;
 				margin: auto;
 				width: 60%;
 				height: 100%;
@@ -76,33 +72,25 @@
 
 	</head>
 	<body>
-		<div id="app" class="layout">
-			<Layout>
-				<Header style="min-height: 50px;background-color: #5b6270;">
-				
-				</Header>
-				<Content :style="{padding: '0 150px'}">
-					<Breadcrumb :style="{margin: '20px 0'}">
+		<div class="layout" style="padding: '0 150px'">
+					<div style="margin: '20px 0';width: 100%;float: left;">
 						<a href="/index.html">单部电影票房</a>&nbsp;&nbsp;&nbsp;&nbsp;
-       	 				<a>部分城市观影情况</a>&nbsp;&nbsp;&nbsp;&nbsp;
+       	 				<a>部分城市观影情况</a>&nbsp;&nbsp;&nbsp;&nbsp;			
+					</div>
 					
-					</Breadcrumb>
-					
-						<div style="min-height: 400px;">
+					<div style="min-height: 400px;width: 100%;float: left;">
 							<div id="app">
 								<div class="box">
 									<input type="button" value="开始监听HDFS" v-on:click="startSocket()" />
 									<div id="main" style="width: 100%; height:40%;float: left;"></div>
-									<div style="width: 100%;height:40%;float: left;"></div>
+									<div style="width: 100%;height:10%;float: left;"></div>
 									<div id="main2" style="width: 100%; height:40%;float: left;"></div>
 									
 								</div>
 							</div>
-						</div>
+					</div>
 					
-				</Content>
-				<Footer class="layout-footer-center"></Footer>
-			</Layout>
+		
 		</div>
 		<script>
 			var app=new Vue({
@@ -227,6 +215,127 @@
 					colors3: ["red", "orange", "yellow", "green", "blue"],
 					colorMap3: {},
 					colorIndex3: 0,
+					option3:{
+						title: {
+							text: 'Stacked Area Chart'
+						},
+						tooltip: {
+							trigger: 'axis',
+							axisPointer: {
+							type: 'cross',
+							label: {
+								backgroundColor: '#6a7985'
+							}
+							}
+						},
+						legend: {
+							//这里为所有的geners
+							data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+						},
+						toolbox: {
+							feature: {
+							saveAsImage: {}
+							}
+						},
+						grid: {
+							left: '3%',
+							right: '4%',
+							bottom: '3%',
+							containLabel: true
+						},
+						xAxis: [
+							{
+							nameTextStyle: {
+                    			fontWeight: 600,
+								fontSize: 18
+							},
+							type: 'category',
+							boundaryGap: false,
+							data: this.dates2,//日期作为x轴
+							}
+						],
+						yAxis: [
+							{
+							type: 'value'
+							}
+						],
+						animationDuration: 0,
+						animationDurationUpdate: 1000,
+					  	animationEasing: 'linear',
+					  	animationEasingUpdate: 'linear',
+					  	graphic: {
+					      	elements: [
+					        	{
+					          		type: 'text',						          		
+									top: 0,
+						          	right: 70,
+						        	style: {
+							            text: '',
+							            font: 'bolder 50px monospace',
+							            fill: 'rgba(100, 100, 100, 0.25)'
+					          		},
+					          		z: 100
+					        	}
+					      	]
+					    },
+						series: [
+							{
+								name: 'Email',
+								type: 'line',
+								stack: 'Total',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: [120, 132, 101, 134, 90, 230, 210]
+							},
+							{
+								name: 'Union Ads',
+								type: 'line',
+								stack: 'Total',
+								smooth: true,
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: [220, 182, 191, 234, 290, 330, 310]
+							},
+							{
+								name: 'Video Ads',
+								type: 'line',
+								stack: 'Total',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: [150, 232, 201, 154, 190, 330, 410]
+							},
+							{
+								name: 'Direct',
+								type: 'line',
+								stack: 'Total',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: [320, 332, 301, 334, 390, 330, 320]
+							},
+							{
+								name: 'Search Engine',
+								type: 'line',
+								stack: 'Total',
+								label: {
+									show: true,
+									position: 'top'
+								},
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: [820, 932, 901, 934, 1290, 1330, 1320]
+							}
+						]
+					}
 				},
 				methods: {
 					startSocket: function() {
