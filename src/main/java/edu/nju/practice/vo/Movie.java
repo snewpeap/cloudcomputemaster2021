@@ -3,10 +3,9 @@ package edu.nju.practice.vo;
 import java.io.Serializable;
 import java.util.List;
 
-public class Movie implements Serializable
-{
+public class Movie implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	private int movieID;
 	private int entityID;
 	private String movieName;
@@ -19,11 +18,11 @@ public class Movie implements Serializable
 	private String city;
 	private double boxOffice;
 	private int audience;
-	
+
 	public Movie() {
 		super();
 	}
-	
+
 	public Movie(int movieID, int entityID, String movieName, List<String> genre, List<String> country, String date,
 			int cinemaID, String cinemaName, String province, String city, double boxOffice, int audience) {
 		super();
@@ -40,12 +39,10 @@ public class Movie implements Serializable
 		this.boxOffice = boxOffice;
 		this.audience = audience;
 	}
-	
-	public Movie(Movie movie)
-	{
-		this(movie.movieID, movie.entityID, movie.movieName, movie.genre, movie.country, movie.date,
-			movie.cinemaID, movie.cinemaName, movie.province, movie.city, movie.boxOffice, 
-			movie.audience);
+
+	public Movie(Movie movie) {
+		this(movie.movieID, movie.entityID, movie.movieName, movie.genre, movie.country, movie.date, movie.cinemaID,
+				movie.cinemaName, movie.province, movie.city, movie.boxOffice, movie.audience);
 	}
 
 	public int getMovieID() {
