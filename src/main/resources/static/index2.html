@@ -9,18 +9,14 @@
 				padding: 0px;
 			}
 			html, body, #app {
-				height: 100%;
-				width: 100%;
+				/* height: 100%;
+				width: 100%; */
 			}
 			#app {
 				text-align: center;
 			}
 			.box {
-				position: absolute;
-				left: 0;
-				right: 0;
-				top: 0;
-				bottom: 0;
+				float: center;
 				margin: auto;
 				width: 60%;
 				height: 100%;
@@ -40,9 +36,8 @@
 				border: 1px solid #38393a;
 				background: #f5f7f9;
 				position: relative;
-				height: 100%;
 				border-radius: 4px;
-				overflow: hidden;
+				/* overflow: hidden; */
 			}
 			.layout-logo{
 				width: 100px;
@@ -76,33 +71,34 @@
 
 	</head>
 	<body>
-		<div id="app" class="layout">
+		<div id='app' class="layout">
 			<Layout>
 				<Header style="min-height: 50px;background-color: #5b6270;">
 				
 				</Header>
+				
 				<Content :style="{padding: '0 150px'}">
 					<Breadcrumb :style="{margin: '20px 0'}">
 						<a href="/index.html">单部电影票房</a>&nbsp;&nbsp;&nbsp;&nbsp;
-       	 				<a>部分城市观影情况</a>&nbsp;&nbsp;&nbsp;&nbsp;
-					
+       	 				<a>部分城市观影情况</a>&nbsp;&nbsp;&nbsp;&nbsp;			
 					</Breadcrumb>
 					
-						<div style="min-height: 400px;">
+					<Card style="height: 1000px;">
 							<div id="app">
 								<div class="box">
+										
 									<input type="button" value="开始监听HDFS" v-on:click="startSocket()" />
-									<div id="main" style="width: 100%; height:40%;float: left;"></div>
-									<div style="width: 100%;height:40%;float: left;"></div>
-									<div id="main2" style="width: 100%; height:40%;float: left;"></div>
+									
+									<div id="main" style="margin-top:30px;width: 100%; min-height:400px;float: left;"></div>
+									<Divider></Divider>
+									<div id="main2" style="width: 100%; min-height:400px;float: left;"></div>
 									
 								</div>
 							</div>
-						</div>
-					
+					</Card>
 				</Content>
-				<Footer class="layout-footer-center"></Footer>
-			</Layout>
+					
+		
 		</div>
 		<script>
 			var app=new Vue({
@@ -125,6 +121,17 @@
 					nameKey2: [],
 					nameValue2: [],
 					option2: {
+							graphic: {
+						      	elements: [
+						        	{
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		}
+						        	}
+						      	]
+						    },
 							legend:{
 								data:this.elements2,
 							},
@@ -133,7 +140,6 @@
 								trigger: 'axis'
 							},
 							xAxis: {
-								type: 'category',
 								nameTextStyle: {
                     				fontWeight: 600,
 									fontSize: 18
@@ -145,7 +151,7 @@
 							},
 							yAxis: {
 								type: 'value',
-								name: '观众数',
+								name: '观影人次',
 								axisLabel: {
 									interval: 'auto',
 									formatter: '{value}'
@@ -160,23 +166,27 @@
 									name:'南京市',
 									type:'line',
 									smooth: true,
+									symbol:'none',
 									data: this.nanjing,	// 绑定实时数据数组
 								},
 								{
 									name:'郑州市',
 									type:'line',
+									symbol:'none',
 									smooth: true,
 									data: this.zhengzhou,	// 绑定实时数据数组
 								},
 								{
 									name:'张家界市',
 									type:'line',
+									symbol:'none',
 									smooth: true,
 									data: this.zhangjiajie,	// 绑定实时数据数组
 								},
 								{
 									name:'上海市',
 									type:'line',
+									symbol:'none',
 									smooth: true,
 									data: this.shanghai,	// 绑定实时数据数组
 								},
@@ -184,6 +194,7 @@
 									name:'广州市',
 									type:'line',
 									smooth: true,
+									symbol:'none',
 									data: this.guangzhou,	// 绑定实时数据数组
 								}
 							],
@@ -212,14 +223,14 @@
 					colorMap: {},
 					colorIndex: 0,
 					urls: [
-						'api/startMonitor',
-						'api/getStreamingDataList'
+						'/api/startMonitor',
+						'/api/getStreamingDataList'
 					],
-
 					//merge
 					data3: [],
 					new_datas3:[],
 					newData3: [],
+					dates3:[],
 					nameMap3: {},
 					nameKey3: [],
 					nameValue3: [],
@@ -227,6 +238,231 @@
 					colors3: ["red", "orange", "yellow", "green", "blue"],
 					colorMap3: {},
 					colorIndex3: 0,
+					zhanzheng:[],
+					xiju:[],
+					maoxian:[],
+					xuanyi:[],
+					jingsong:[],
+					juqing:[],
+					fanzui:[],
+					dongzuo:[],
+					zhuxuanlv:[],
+					lishi:[],
+					zhuanji:[],
+					qita:[],
+					option3:{
+						graphic: {
+						      	elements: [
+						        	{
+						          		style: {
+								            text: '',
+								            font: 'bolder 50px monospace',
+								            fill: 'rgba(100, 100, 100, 0.25)'
+						          		}
+						        	}
+						      	]
+						    },
+						title: {
+							text: ''
+						},
+						tooltip: {
+								formatter: '{b0}<br />{a0}:{c0}%<br />{a1}:{c1}%<br />{a2}:{c2}%<br />{a3}:{c3}%<br />{a4}:{c4}%<br />{a5}:{c5}%<br />{a6}:{c6}%<br />{a7}:{c7}%<br />{a8}:{c8}%<br />{a9}:{c9}%<br />{a10}:{c10}%<br />{a11}:{c11}%',
+								//order: 'valueDesc',
+								trigger: 'axis'
+							},
+						legend: {
+							//这里为所有的geners
+							data: ['战争', '喜剧', '冒险', '悬疑', '惊悚', '剧情', '犯罪', '动作', '主旋律', '历史', '传记']// '其他']
+						},
+						grid: {
+							left: '3%',
+							right: '4%',
+							bottom: '3%',
+							containLabel: true
+						},
+						xAxis: 
+							{
+							nameTextStyle: {
+                    			fontWeight: 600,
+								fontSize: 18
+							},
+							type: 'category',
+							boundaryGap: false,
+							data: this.dates3,//日期作为x轴
+							}
+						,
+						yAxis: 
+							{
+								name: '占比',
+								type: 'value',
+                    			max: 100,
+                    			min: 0,
+                    			interval:20,
+							}
+						,
+						animationDuration: 0,
+						animationDurationUpdate: 1000,
+					  	animationEasing: 'linear',
+					  	animationEasingUpdate: 'linear',
+					  	graphic: {
+					      	elements: [
+					        	{
+					          		type: 'text',						          		
+									top: 0,
+						          	right: 70,
+						        	style: {
+							            text: '',
+							            font: 'bolder 50px monospace',
+							            fill: 'rgba(100, 100, 100, 0.25)'
+					          		},
+					          		z: 100
+					        	}
+					      	]
+					    },
+						series: [
+							{
+								name: '战争',
+								type: 'line',
+								symbol:'none',
+								stack: 'Total',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.zhanzheng
+							},
+							{
+								name: '喜剧',
+								type: 'line',
+								symbol:'none',
+								stack: 'Total',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.xiju
+							},
+							{
+								name: '冒险',
+								type: 'line',
+								symbol:'none',
+								stack: 'Total',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.maoxian
+							},
+							{
+								name: '悬疑',
+								type: 'line',
+								symbol:'none',
+								stack: 'Total',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.xuanyi
+							},
+							{
+								name: '惊悚',
+								type: 'line',
+								stack: 'Total',
+								symbol:'none',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.jingsong
+								
+							},
+							{
+								name: '剧情',
+								type: 'line',
+								stack: 'Total',
+								symbol:'none',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.juqing
+							}
+							,
+							{
+								name: '犯罪',
+								type: 'line',
+								stack: 'Total',
+								symbol:'none',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.fanzui
+							}
+							,
+							{
+								name: '动作',
+								type: 'line',
+								stack: 'Total',
+								symbol:'none',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.dongzuo
+							}
+							,
+							{
+								name: '主旋律',
+								type: 'line',
+								stack: 'Total',
+								symbol:'none',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.zhuxuanlv
+							}
+							,
+							{
+								name: '历史',
+								type: 'line',
+								stack: 'Total',
+								symbol:'none',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.lishi
+							}
+							,
+							
+							{
+								name: '传记',
+								type: 'line',
+								stack: 'Total',
+								symbol:'none',
+								areaStyle: {},
+								emphasis: {
+									focus: 'series'
+								},
+								data: this.zhuanji
+							}
+							 ,
+							{
+								name: '其他',
+								type: 'line',
+							 	stack: 'Total',	
+							 	areaStyle: {},
+								 symbol:'none',
+							 	emphasis: {
+							 		focus: 'series'
+							 	},
+							 	data: this.qita
+							 }
+
+						]
+					}
 				},
 				methods: {
 					startSocket: function() {
@@ -252,13 +488,10 @@
 		                this.$http.post(this.urls[1], jsonData, {
 		                	emulateJSON: true
 		                }).then(function(res){
-		                	console.log(res.body);
 		                   	if(res.body) {
 		                   		app.newData2=res.body.cityMovies;
 								app.newData3=res.body.genreMovies;
 			                   	if(app.newData2.length>0) {
-			                   		console.log(app.newData2);
-									console.log(app.newData3);
 			                   		app.updateData2();
 									app.updateData3();
 			                   	}
@@ -300,31 +533,31 @@
 						return this.option2;
 					},
 					getOption3: function() {
-						var option = {
-							series: [
-								{
-								type: 'pie',
-								radius: [0, '50%'],
-								data: this.new_datas3
-								}
-							],
-							graphic: {
-						      	elements: [
-						        	{
-										type: 'text',
-						          		top: 0,
-						          		right: 70,
-						          		style: {
-								            text: '',
-								            font: 'bolder 50px monospace',
-								            fill: 'rgba(100, 100, 100, 0.25)'
-						          		},
-										z: 100
-						        	}
-						      	]
-						    }
-						};
-						return option;
+						// var option = {
+						// 	series: [
+						// 		{
+						// 		type: 'pie',
+						// 		radius: [0, '50%'],
+						// 		data: this.new_datas3
+						// 		}
+						// 	],
+						// 	graphic: {
+						//       	elements: [
+						//         	{
+						// 				type: 'text',
+						//           		top: 0,
+						//           		right: 70,
+						//           		style: {
+						// 		            text: '',
+						// 		            font: 'bolder 50px monospace',
+						// 		            fill: 'rgba(100, 100, 100, 0.25)'
+						//           		},
+						// 				z: 100
+						//         	}
+						//       	]
+						//     }
+						// };
+						return this.option3;
 					},
 					getColor: function(name) {
 						if(!this.colorMap[name]) {
@@ -384,61 +617,149 @@
 						this.option2.series[2].data = this.zhangjiajie;
 						this.option2.series[3].data = this.shanghai;
 						this.option2.series[4].data = this.guangzhou;
+						this.option2.graphic.elements[0].style.text=this.newData2[0].date;
                 		myChart.setOption(this.option2);
 					},
 					updateData3: function() {
 						//
 						//取genre[0]作为categroy,audience作为数量
+						var tag11 = false;var tag12 = false;
+						var tag6 = false;var tag7 = false;var tag8 = false;var tag9 = false;var tag10 = false;
+						var tag1 = false;var tag2 = false;var tag3 = false;var tag4 = false;var tag5 = false;
+						
+						var sum_box = 0;
+						for(var i=0; i<this.newData3.length; i++){
+							sum_box += this.newData3[i].audience;
+						}
+				
 						for(var i=0; i<this.newData3.length; i++) {
-							if(this.nameMap3[this.newData3[i].genre[0]]) {
-								for(var k=0; k<this.data3.length; k++) {
-									if(this.data3[k].genre[0]==this.newData3[i].genre[0]) {
-										this.data3[k].date=this.newData3[i].date;
-										this.data3[k].audience=this.newData3[i].audience;
-										this.nameValue3[k]=this.data3[k].audience;
-										break;
-									}
-								}
-							} else {
-								this.nameMap3[this.newData3[i].genre[0]]=true;
-								this.nameKey3.push(this.newData3[i].genre[0]);
-								// 深复制
-								this.data3.push(JSON.parse(JSON.stringify(this.newData3[i])));
-								this.nameValue3.push(this.newData3[i].audience);
+							if(this.newData3[i].genre[0] == '战争') {
+								this.zhanzheng.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag1 = true;
+							}else if (this.newData3[i].genre[0] == '喜剧'){
+								
+								this.xiju.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag2 = true;
+							}else if (this.newData3[i].genre[0]== '冒险'){
+								
+								this.maoxian.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag3 = true;
+							}else if (this.newData3[i].genre[0] == '悬疑'){
+								this.xuanyi.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag4 = true;
+							}else if (this.newData3[i].genre[0]== '惊悚'){
+								//sum_box += this.newData3[i].audience;
+								this.jingsong.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag5 = true;
+							}else if (this.newData3[i].genre[0]== '剧情'){
+								//sum_box += this.newData3[i].audience;
+								this.juqing.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag6 = true;
+							}else if (this.newData3[i].genre[0]== '犯罪'){
+								//sum_box += this.newData3[i].audience;
+								this.fanzui.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag7 = true;
+							}else if (this.newData3[i].genre[0]== '动作'){
+								//sum_box += this.newData3[i].audience;
+								this.dongzuo.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag8 = true;
+							}else if (this.newData3[i].genre[0]== '主旋律'){
+								//sum_box += this.newData3[i].audience;
+								this.zhuxuanlv.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag9 = true;
+							}else if (this.newData3[i].genre[0]== '历史'){
+								//sum_box += this.newData3[i].audience;
+								this.lishi.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag10 = true;
+							}else if (this.newData3[i].genre[0]== '传记'){
+								//sum_box += this.newData3[i].audience;
+								this.zhuanji.push(Math.round(this.newData3[i].audience/sum_box*100));
+								tag11 = true;
 							}
+							// else{
+							//  	if(tag12){
+							//  		this.qita[this.qita.length -1 ] = this.qita[this.qita.length -1 ] + this.newData3[i].audience;
+							//  	}else{
+							// 		this.qita.push(Math.floor(this.newData3[i].audience/sum_box*100));
+							//  	}
+							//  	tag12 = true;
+							// }
 						}
+
+						if(!tag1){
+							this.zhanzheng.push(0);
+						}
+						if(!tag2){
+							this.xiju.push(0);
+						}
+						if(!tag3){
+							this.maoxian.push(0);
+						}
+						if(!tag4){
+							this.xuanyi.push(0);
+						}
+						if(!tag5){
+							this.jingsong.push(0);
+						}
+						if(!tag6){
+							this.juqing.push(0);
+						}
+						if(!tag7){
+							this.fanzui.push(0);
+						}
+						if(!tag8){
+							this.dongzuo.push(0);
+						}
+						if(!tag9){
+							this.zhuxuanlv.push(0);
+						}
+						if(!tag10){
+							this.lishi.push(0);
+						}
+						if(!tag11){
+							this.zhuanji.push(0);
+						}
+						// this.zhanzheng[this.zhanzheng.length -1 ] = Math.ceil(this.zhanzheng[this.zhanzheng.length -1 ]/sum_box*100);
+						// this.xiju[this.xiju.length -1 ] = Math.ceil(this.xiju[this.xiju.length -1 ]/sum_box*100);
+						// this.maoxian[this.maoxian.length -1 ] = Math.ceil(this.maoxian[this.maoxian.length -1 ]/sum_box*100);
+						// this.xuanyi[this.xuanyi.length -1 ] = Math.ceil(this.xuanyi[this.xuanyi.length -1 ]/sum_box*100);
+						// this.jingsong[this.jingsong.length -1 ] = Math.ceil(this.jingsong[this.jingsong.length -1 ]/sum_box*100);
+						// this.juqing[this.juqing.length -1 ] = Math.ceil(this.juqing[this.juqing.length -1 ]/sum_box*100);
+						// this.fanzui[this.fanzui.length -1 ] = Math.ceil(this.fanzui[this.fanzui.length -1 ]/sum_box*100);
+						// this.dongzuo[this.dongzuo.length -1 ] = Math.ceil(this.dongzuo[this.dongzuo.length -1 ]/sum_box*100);
+						// this.zhuxuanlv[this.zhuxuanlv.length -1 ] = Math.ceil(this.zhuxuanlv[this.zhuxuanlv.length -1 ]/sum_box*100);
+						// this.lishi[this.lishi.length -1 ] = Math.ceil(this.lishi[this.lishi.length -1 ]/sum_box*100);
+						// this.zhuanji[this.zhuanji.length -1 ] = Math.ceil(this.zhuanji[this.zhuanji.length -1 ]/sum_box*100);
+						this.qita.push(100-this.zhanzheng[this.zhanzheng.length -1 ]-this.xiju[this.xiju.length -1 ]-this.maoxian[this.maoxian.length -1 ]
+						-this.xuanyi[this.xuanyi.length -1 ]-this.jingsong[this.jingsong.length -1 ]-this.juqing[this.juqing.length -1 ]-this.fanzui[this.fanzui.length -1 ]
+						-this.dongzuo[this.dongzuo.length -1 ]-this.zhuxuanlv[this.zhuxuanlv.length -1 ]-this.lishi[this.lishi.length -1 ]-this.zhuanji[this.zhuanji.length -1 ]);
+						//	填充0
+						//'战争', '喜剧', '冒险', '悬疑', '惊悚', '剧情', '犯罪', '动作', '主旋律', '历史', '传记', '其他'
+						
+					
 						//data=[{value,name}]
-						this.new_datas3 = [];
-						for(var i=0;i<this.nameValue3.length;i++){
-							var dp = {name:this.nameKey3[i],value:this.nameValue3[i]};
-							this.new_datas3.push(JSON.parse(JSON.stringify(dp)));
-						}
+						this.dates3.push(this.newData3[0].date);
 						var myChart = echarts.init(document.getElementById('main2'));
-						console.log(this.new_datas3);
-						myChart.setOption({
-							series: [
-							    {
-							       type: 'pie',
-							       data: this.new_datas3,
-								   radius: [0, '50%'],
-							    }
-						   	],
-						   	graphic: {
-						      	elements: [
-						        	{
-						          		style: {
-								            text: this.newData3[0].date,
-								            font: 'bolder 50px monospace',
-								            fill: 'rgba(100, 100, 100, 0.25)'
-						          		}
-						        	}
-						      	]
-						    }
-						});
+						this.option3.xAxis.data = this.dates3;
+                		this.option3.series[0].data = this.zhanzheng;
+                		this.option3.series[1].data = this.xiju;
+						this.option3.series[2].data = this.maoxian;
+						this.option3.series[3].data = this.xuanyi;
+						this.option3.series[4].data = this.jingsong;
+						this.option3.series[5].data = this.juqing;
+						this.option3.series[6].data = this.fanzui;
+						this.option3.series[7].data = this.dongzuo;
+						this.option3.series[8].data = this.zhuxuanlv;
+						this.option3.series[9].data = this.lishi;
+						this.option3.series[10].data = this.zhuanji;
+						this.option3.series[11].data = this.qita;
+						this.option3.graphic.elements[0].style.text=this.newData3[0].date;
+						console.log(this.option3);
+						myChart.setOption(this.option3);
 					},
 				},
 				mounted() {
-				
+					
 				}
 			});
 		</script>
